@@ -20,6 +20,34 @@
 :- dynamic medico/3.
 :- dynamic consulta/6.
 
+
+
+%-------------------------------------------------------------
+% Povoamento
+
+
+utente(1,'Ana',20,'Braga').
+utente(2,'Bruno',19,'Braga').
+utente(3,'Beatriz',25,'Porto').
+utente(4,'Carla',23,'Braga').
+utente(5,'João',23,'Braga').
+
+servico(1,'Oftalmologia','Hospital de Braga','Braga').
+servico(2,'Ginecologia','Centro de Saúde de Maximinos','Braga').
+servico(3,'Cardiologia','Hospital de Braga','Braga').
+servico(4,'Ortopedia','Hospital S.João','Porto').
+servico(5,'Oftalmologia','Hospital de Braga','Braga').
+
+consulta('10-11-2018',4,2,25,joao,naosei).
+consulta('18-03-2018',3,4,43,joao,naosei).
+consulta('09-02-2019',5,5,30,joao,naosei).
+consulta('28-01-2019',2,3,20,joao,naosei).
+consulta('16-09-2018',2,1,35,joao,naosei).
+consulta('11-04-2018',1,2,22,joao,naosei).
+consulta('13-04-2018',1,2,25,joao,naosei).
+
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes
 
@@ -125,6 +153,10 @@ identificaInstituicoes(Lista) :- solucoes(I,servico(_,_,I,_),L),removeRepetidos(
 
 %------------------------4--------------------------
 
+identificar_utenteID(ID, R) :- solucoes((ID, N, I, C), utente(ID, N, I, C), R).
+identificar_utenteNome(Nome, R) :- solucoes((ID, Nome, I, C), utente(ID, Nome, I, C), R).
+identificar_utenteIdade(Idade, R) :- solucoes((ID, N, Idade, C), utente(ID, N, Idade, C), R).
+identificar_utenteCidade(Cidade, R) :- solucoes((ID, N, I, Cidade), utente(ID, N, I, Cidade), R).
 
 %------------------------5--------------------------
 % Extensao do predicado servicosInstituicao: Instituicao, ListaServicos -> {V,F}
@@ -151,7 +183,37 @@ descServicos([H | T],Lista) :- solucoes(S,servico(H,S,_,_),L), descServicos(T,R)
 
 %------------------------6--------------------------
 
+% Extensao do predicado utentesServico: Servico, Lista_de_Utentes -> {V,F}
+
+utentesServico(I,S):- solucoes(IDU,consulta(_,IDU,I,_,_,_),W),removeRepetidos(W,U),encontrarUtentes(U,S).
+
+% Extensao do predicado utentesInstituicao: Instituicao,Lista_de_Utentes -> {V,F}
+
+utentesInstituicao(I,R) :- solucoes(IDS,servico(IDS,_,I,_),S),servicosUtentes(S,R).
+
+%--- Auxiliar da 6
+
+% Extensao do predicado encontrarUtentes: Lista_de_id_utentes,Lista_de_Utentes -> {V,F}
+
+encontrarUtentes([],[]).
+encontrarUtentes([H|T],R) :- identificar_utenteID(H,W),encontrarUtentes(T,S),concatenar(S,W,R).
+
+% Extensao do predicado servicosUtentes: Lista_de_servicos,Lista_de_Utentes -> {V,F}
+
+servicosUtentes([],[]).
+servicosUtentes([H|T],R) :- utentesServico(H,W),servicosUtentes(T,S),concatenar(W,S,Z),removeRepetidos(Z,R).
+
+
 %------------------------7--------------------------
+
+% Extensao do predicado servicosUtente: IDU,Lista_De_Servicos ->{V,F}
+
+servicosUtente([],[]).
+servicosUtente(IDU,LR) :- solucoes(IDS,consulta(_,IDU,IDS,_),W),removeRepetidos(W,U),encontrarServicoU(U,LR).
+
+%--- auxiliar da 7
+encontrarServicoU([],[]).
+encontrarServicoU([H|T],R) :- solucoes((H,N,I,M),servico(H,N,I,M),W),encontrarServicoU(T,S),concatenar(S,W,R).
 
 %------------------------8--------------------------
 % Extensao do predicado custoUtente: IDUt,Custo -> {V,F}
