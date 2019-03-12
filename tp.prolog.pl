@@ -53,6 +53,8 @@ consulta('13-04-2018',1,2,25,joao).
 
 solucoes(X,Y,Z) :- findall(X,Y,Z).
 
+% Extensao do predicado comprimento: Lista, Resultado -> {V,F}
+
 comprimento( [],0 ).
 comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
 
