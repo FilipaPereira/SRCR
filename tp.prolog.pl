@@ -153,10 +153,25 @@ identificaInstituicoes(Lista) :- solucoes(I,servico(_,_,I,_),L),removeRepetidos(
 
 %------------------------4--------------------------
 
+% Extensao do predicado identificar_utente: #IDUt,Nome,Idade,Cidade -> {V,F}
+
 identificar_utenteID(ID, R) :- solucoes((ID, N, I, C), utente(ID, N, I, C), R).
-identificar_utenteNome(Nome, R) :- solucoes((ID, Nome, I, C), utente(ID, Nome, I, C), R).
-identificar_utenteIdade(Idade, R) :- solucoes((ID, N, Idade, C), utente(ID, N, Idade, C), R).
-identificar_utenteCidade(Cidade, R) :- solucoes((ID, N, I, Cidade), utente(ID, N, I, Cidade), R).
+identificar_utenteNome(NOME, R) :- solucoes((ID, NOME, I, C), utente(ID, NOME, I, C), R).
+identificar_utenteIdade(IDADE, R) :- solucoes((ID, N, IDADE, C), utente(ID, N, IDADE, C), R).
+identificar_utenteCidade(CIDADE, R) :- solucoes((ID, N, I, CIDADE), utente(ID, N, I, CIDADE), R).
+
+% Extensao do predicado identificar_servico: #IDServ,Descricao,Instituicao,Cidade -> {V,F}
+
+identificar_servicoID(ID, R) :- solucoes((ID, D, I, C), servico(ID, D, I, C), R).
+identificar_servicoDescricao(DESC, R) :- solucoes((ID, DESC, I, C), servico(ID, DESC, I, C), R).
+identificar_servicoInstituicao(INST, R) :- solucoes((ID, D, INST, C), servico(ID, D, INST, C), R).
+identificar_servicoCidade(CITY, R) :- solucoes((ID, D, I, CITY), servico(ID, D, I, CITY), R).
+
+% Extensao do predicado identificar_consulta: Data, #IdUt, #IdServ, Custo
+identificar_consultaData(DATE, R) :- solucoes((D, Idutente, Idservico, Custo), consulta(DATE, Idutente, Idservico, Custo), R).
+identificar_consultaIDUtente(IDU, R) :- solucoes((D, IDU, Idservico, Custo), consulta(D, IDU, Idservico, Custo), R).
+identificar_consultaIDServico(IDS, R) :- solucoes((D, Idutente, IDS, Custo), consulta(D, Idutente, IDS, Custo), R).
+identificar_consultaCusto(CUSTO, R) :- solucoes((D, Idutente, Idservico, CUSTO), consulta(D, Idutente, Idservico, CUSTO), R).
 
 %------------------------5--------------------------
 % Extensao do predicado servicosInstituicao: Instituicao, ListaServicos -> {V,F}
