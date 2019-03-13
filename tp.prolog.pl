@@ -322,7 +322,7 @@ servicosData(D,Lista) :- solucoes(IDServ,consulta(D,_,IDServ,_,_),R), descServic
 
 % Extensao do predicado servicosCusto: Custo, ListaServicos -> {V,F}
 
-servicosCusto(C,Lista) :- solucoes(IDServ,consulta(_,_,IDServ,C,_,),L), descServicos(L,T), removeRepetidos(T,Lista).
+servicosCusto(C,Lista) :- solucoes(IDServ,consulta(_,_,IDServ,C,_),L), descServicos(L,T), removeRepetidos(T,Lista).
 
 
 %--- Auxiliar da 5
@@ -336,7 +336,7 @@ descServicos([H | T],Lista) :- solucoes(S,servico(H,S,_,_),L), descServicos(T,R)
 
 % Extensao do predicado utentesServico: Servico, ListaUtentes -> {V,F}
 
-utentesServico(I,S):- solucoes(IDU,consulta(_,IDU,I,_,_,),W),removeRepetidos(W,U),encontrarUtentes(U,S).
+utentesServico(I,S):- solucoes(IDU,consulta(_,IDU,I,_,_),W),removeRepetidos(W,U),encontrarUtentes(U,S).
 
 
 % Extensao do predicado utentesInstituicao: Instituicao,ListaUtentes -> {V,F}
@@ -373,7 +373,7 @@ encontrarServicoU([H|T],R) :- identificar_servicoID(H,W),encontrarServicoU(T,S),
 %------------------------8--------------------------
 % Extensao do predicado custoUtente: IDUt,Custo -> {V,F}
 
-custoUtente(ID,R) :- solucoes(C,consulta(_,ID,_,C,_,),L), somaLista(L,R).
+custoUtente(ID,R) :- solucoes(C,consulta(_,ID,_,C,_),L), somaLista(L,R).
 
 
 % Extensao do predicado custoServico: IDServ,Custo -> {V,F}
