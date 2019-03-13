@@ -71,15 +71,25 @@ medico(9,'Sofia Lopes',['Dermatologia','Oftalmologia'],['Hospital de Santa Maria
 medico(10,'Manuel Marques',['Ortopedia'],['Hospital S.João']).
 medico(11,'Adriana Oliveira',['Cardiologia'],['Hospital S.João']).
 
-consulta('10-11-2018',4,2,25,joao).
-consulta('18-03-2018',3,4,43,joao).
-consulta('09-02-2019',5,5,30,joao).
-consulta('28-01-2019',2,3,20,joao).
-consulta('16-09-2018',2,1,35,joao).
-consulta('11-04-2018',1,2,22,joao).
-consulta('13-04-2018',1,2,25,joao).
-
-
+consulta('10-11-2018',1,2,30,5).
+consulta('18-03-2018',2,4,47,10).
+consulta('09-02-2019',3,13,30,5).
+consulta('28-01-2019',4,14,19,2).
+consulta('16-09-2018',5,6,35,7).
+consulta('11-04-2018',6,10,22,9).
+consulta('23-05-2018',7,5,25,6).
+consulta('29-01-2019',8,6,35,7).
+consulta('11-04-2018',9,7,15,8).
+consulta('16-09-2018',10,11,47,1).
+consulta('10-12-2018',11,3,30,4).
+consulta('03-11-2018',12,8,25,3).
+consulta('15-03-2018',13,1,20,6).
+consulta('25-09-2018',14,9,35,11).
+consulta('12-10-2018',15,11,47,1).
+consulta('18-07-2018',2,15,50,9).
+consulta('02-03-2019',11,3,30,4).
+consulta('28-09-2018',3,3,25,4).
+consulta('12-01-2019',15,12,25,2).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes
