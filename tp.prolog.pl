@@ -297,6 +297,13 @@ identificar_consultaCusto(CUSTO, R) :- solucoes((D, Idutente, Idservico, CUSTO,I
                                             consulta(D, Idutente, Idservico, CUSTO,Idmedico), R).
 
 
+
+% Extensao do predicado identificar_consultaMedico: IdMedico,ListaConsultas -> {V,F}
+
+identificar_consultaMedico(MEDICO, R) :- solucoes((D, Idutente, Idservico, Custo, IDM),
+                                            consulta(D, Idutente, Idservico, Custo, IDM), R).
+
+
 %------------------------5--------------------------
 % Extensao do predicado servicosInstituicao: Instituicao, ListaServicos -> {V,F}
 
