@@ -17,7 +17,7 @@
 :- op( 900,xfy,'::' ).
 :- dynamic utente/4.
 :- dynamic servico/4.
-:- dynamic medico/3.
+:- dynamic medico/4.
 :- dynamic consulta/5.
 
 
@@ -26,17 +26,50 @@
 % Povoamento
 
 
-utente(1,'Ana',20,'Braga').
-utente(2,'Bruno',19,'Braga').
-utente(3,'Beatriz',25,'Porto').
-utente(4,'Carla',23,'Braga').
-utente(5,'João',23,'Braga').
+utente(1,'Ana Santos',34,'Braga').
+utente(2,'Bruno Mendonça',23,'Porto').
+utente(3,'Carla Martins',29,'Guimarães').
+utente(4,'Beatriz Jesus',12,'Lisboa').
+utente(5,'Júlio Carvalho',36,'Braga').
+utente(6,'Carlos Silva',19,'Porto').
+utente(7,'Xavier Teixeira',51,'Braga').
+utente(8,'Luis Almeida',32,'Braga').
+utente(9,'Pedro Lima',20,'Braga').
+utente(10,'André Campos',42,'Lisboa').
+utente(11,'Teresa Cerqueira',54,'Guimarães').
+utente(12,'Sérgio Gonçalves',16,'Coimbra').
+utente(13,'João Pereira',24,'Braga').
+utente(14,'Henrique Castro',83,'Porto').
+utente(15,'Sara Fernandes',27,'Lisboa').
+
 
 servico(1,'Oftalmologia','Hospital de Braga','Braga').
 servico(2,'Ginecologia','Centro de Saúde de Maximinos','Braga').
-servico(3,'Cardiologia','Hospital de Braga','Braga').
+servico(3,'Cardiologia','Hospital da Senhora da Oliveira Guimarães','Guimarães').
 servico(4,'Ortopedia','Hospital S.João','Porto').
-servico(5,'Oftalmologia','Hospital de Braga','Braga').
+servico(5,'Oftalmologia','Centro de Saúde de Maximinos','Braga').
+servico(6,'Cardiologia','Hospital de Braga','Braga').
+servico(7,'Otorrinolaringologia','Hospital de Braga','Braga').
+servico(8,'Oftalmologia','Centro Hospitalar e Universitário de Coimbra','Coimbra').
+servico(9,'Cardiologia','Hospital S.João','Porto').
+servico(10,'Oftalmologia','Hospital de Santa Maria','Porto').
+servico(11,'Dermatologia','Hospital S.José' ,'Lisboa').
+servico(12,'Otorrinolaringologia','Hospital S.José' ,'Lisboa').
+servico(13,'Ginecologia','Hospital da Senhora da Oliveira Guimarães','Guimarães').
+servico(14,'Psiquiatria','Hospital da Luz','Lisboa').
+servico(15,'Dermatologia','Hospital de Santa Maria','Porto').
+
+medico(1,'José Moreira',['Dermatologia','Ortopedia'],['Hospital S.José']).
+medico(2,'Cristina Félix',['Psiquiatria','Otorrinolaringologia'],['Hospital S.José','Hospital da Luz']).
+medico(3,'Helena Pereira',['Oftalmologia','Dermatologia'],['Centro Hospitalar e Universitário de Coimbra']).
+medico(4,'Rodrigo Vieira',['Cardiologia'],['Hospital da Senhora da Oliveira Guimarães']).
+medico(5,'Vitória Pinto',['Ginecologia'],['Hospital da Senhora da Oliveira Guimarães','Centro de Saúde de Maximinos']).
+medico(6,'Mariana Sousa',['Oftalmologia','Ortopedia'],['Centro de Saúde de Maximinos','Hospital de Braga']).
+medico(7,'Susana Costa',['Cardiologia'],['Hospital de Braga']).
+medico(8,'Guilherme Cruz',['Otorrinolaringologia'],['Hospital de Braga']).
+medico(9,'Sofia Lopes',['Dermatologia','Oftalmologia'],['Hospital de Santa Maria']).
+medico(10,'Manuel Marques',['Ortopedia'],['Hospital S.João']).
+medico(11,'Adriana Oliveira',['Cardiologia'],['Hospital S.João']).
 
 consulta('10-11-2018',4,2,25,joao).
 consulta('18-03-2018',3,4,43,joao).
@@ -69,18 +102,18 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
 -servico( ID,D,I,C ) :: (solucoes( ID,servico(ID,_,_,_),S ),
                          comprimento( S,N ), N == 1).
 
-+medico( ID,E,I ) :: (solucoes( ID,(medico(ID,_,_)),S ),
++medico( ID,N,E,I ) :: (solucoes( ID,(medico(ID,_,_,_)),S ),
                       comprimento( S,N ), N == 1).
--medico( ID,E,I ) :: (solucoes( ID,(medico(ID,_,_)),S ),
+-medico( ID,N,E,I ) :: (solucoes( ID,(medico(ID,_,_,_)),S ),
                       comprimento( S,N ), N == 1).
 
 +consulta( D,IDU,IDS,C,IDM ) ::
                             (utente(IDU,_,_,_),
                             servico(IDS,_,_,_),
-                            medico(IDM,_,_)).
+                            medico(IDM,_,_,_)).
 
 +consulta( D,IDU,IDS,C,IDM ) ::
-                            (solucoes( (IDM,E),(medico(IDM,E,_)),S ),
+                            (solucoes( (IDM,E),(medico(IDM,_,E,_)),S ),
                              comprimento( S,N ), N >= 1).
 
 %----------------------AUXILIARES----------------------------------
@@ -110,7 +143,7 @@ somaLista( [H | T],R ) :- somaLista( T,S ), R is H+S.
 
 concatenar([],L,L).
 concatenar(L,[],L).
-concatenar([H | T], L, [H | R]) :- concatenar(T,L,R). 
+concatenar([H | T], L, [H | R]) :- concatenar(T,L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite a evolucao do conhecimento
@@ -133,19 +166,19 @@ teste( [R|LR] ) :- R, teste( LR ).
 % Extensao do predicado utente: IDUt,Nome,Idade,Cidade -> {V,F}
 % Extensao do predicado servico: IDServ,Descricao,Instituicao,Cidade -> {V,F}
 % Extensao do predicado consulta: Data, IDUt,IDServ,Custo,IDMed -> {V,F}
-% Extensao do predicado medico: IDMed,Especialidades,Instituicoes -> {V,F}
+% Extensao do predicado medico: IDMed,Nome,Especialidades,Instituicoes -> {V,F}
 
 %------------------------1--------------------------
 registar_utente(X,Y,W,Z) :- evolucao(utente(X,Y,W,Z)).
 registar_servico(X,Y,W,Z) :- evolucao(servico(X,Y,W,Z)).
 registar_consulta(X,Y,W,Z,M) :- evolucao(consulta(X,Y,W,Z,M)).
-registar_medico(X,Y,W) :- evolucao(medico(X,Y,W)).
+registar_medico(X,Y,W,Z) :- evolucao(medico(X,Y,W,Z)).
 
 %------------------------2--------------------------
 remover_utente(X,Y,W,Z) :- involucao(utente(X,Y,W,Z)).
 remover_servico(X,Y,W,Z) :- involucao(servico(X,Y,W,Z)).
 remover_consulta(X,Y,W,Z,M) :- involucao(consulta(X,Y,W,Z,M)).
-remover_medico(X,Y,W) :- involucao(medico(X,Y,W)).
+remover_medico(X,Y,W,Z) :- involucao(medico(X,Y,W,Z)).
 
 %------------------------3--------------------------
 % Extensao do predicado identificaInstituicoes: ListaInstituicoes -> {V,F}
@@ -207,9 +240,9 @@ servicosData(D,Lista) :- solucoes(IDServ,consulta(D,_,IDServ,_,_),R), descServic
 
 % Extensao do predicado servicosCusto: Custo, ListaServicos -> {V,F}
 
-servicosCusto(C,Lista) :- solucoes(IDServ,consulta(_,_,IDServ,C,_,),L), descServicos(L,T), removeRepetidos(T,Lista). 
+servicosCusto(C,Lista) :- solucoes(IDServ,consulta(_,_,IDServ,C,_,),L), descServicos(L,T), removeRepetidos(T,Lista).
 
-%--- Auxiliar da 5 
+%--- Auxiliar da 5
 % Extensao do predicado descServicos: ListaIdServ, ListaServicos -> {V,F}
 
 descServicos([],[]).
@@ -271,4 +304,3 @@ custoInstituicao(I,R) :- solucoes(IDServ,servico(IDServ,_,I,_),Lista), custoList
 
 custoListaServ([],0).
 custoListaServ([H | T],Res) :- custoServico(H,S), custoListaServ(T,B), Res is S+B.
-
