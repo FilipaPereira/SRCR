@@ -23,8 +23,7 @@
 
 
 %-------------------------------------------------------------
-% Povoamento
-
+% Povoamento/Base de Conhecimento
 
 utente(1,'Ana Santos',34,'Braga').
 utente(2,'Bruno Mendonça',23,'Porto').
@@ -59,6 +58,7 @@ servico(13,'Ginecologia','Hospital da Senhora da Oliveira Guimarães','Guimarãe
 servico(14,'Psiquiatria','Hospital da Luz','Lisboa').
 servico(15,'Dermatologia','Hospital de Santa Maria','Porto').
 
+
 medico(1,'José Moreira',['Dermatologia','Ortopedia'],['Hospital S.José']).
 medico(2,'Cristina Félix',['Psiquiatria','Otorrinolaringologia'],['Hospital S.José','Hospital da Luz']).
 medico(3,'Helena Pereira',['Oftalmologia','Dermatologia'],['Centro Hospitalar e Universitário de Coimbra']).
@@ -70,6 +70,7 @@ medico(8,'Guilherme Cruz',['Otorrinolaringologia'],['Hospital de Braga']).
 medico(9,'Sofia Lopes',['Dermatologia','Oftalmologia'],['Hospital de Santa Maria']).
 medico(10,'Manuel Marques',['Ortopedia'],['Hospital S.João']).
 medico(11,'Adriana Oliveira',['Cardiologia'],['Hospital S.João']).
+
 
 consulta('10-11-2018',1,2,30,5).
 consulta('18-03-2018',2,4,47,10).
@@ -179,18 +180,43 @@ teste( [R|LR] ) :- R, teste( LR ).
 % Extensao do predicado medico: IDMed,Nome,Especialidades,Instituicoes -> {V,F}
 
 %------------------------1--------------------------
+
+% Extensao do predicao registar_utente: IdUtente, Nome, Idade, Morada -> {V, F}
+
 registar_utente(X,Y,W,Z) :- evolucao(utente(X,Y,W,Z)).
+
+% Extensao do predicao registar_servico: IdServico, Descricao, Instituicao, Cidade -> {V,F}
+
 registar_servico(X,Y,W,Z) :- evolucao(servico(X,Y,W,Z)).
+
+% Extensao do predicao registar_consulta: Data, IdUtente, IdServico, Custo, IdMedico -> {V,F}
+
 registar_consulta(X,Y,W,Z,M) :- evolucao(consulta(X,Y,W,Z,M)).
+
+% Extensao do predicao registar_medico: IdMedico, Nome, Especialidades, Instituicoes -> {V,F}
+
 registar_medico(X,Y,W,Z) :- evolucao(medico(X,Y,W,Z)).
 
 %------------------------2--------------------------
+
+% Extensao do predicao remover_utente: IdUtente, Nome, Idade, Morada -> {V, F}
+
 remover_utente(X,Y,W,Z) :- involucao(utente(X,Y,W,Z)).
+
+% Extensao do predicao remover_servico: IdServico, Descricao, Instituicao, Cidade -> {V,F}
+
 remover_servico(X,Y,W,Z) :- involucao(servico(X,Y,W,Z)).
+
+% Extensao do predicao remover_consulta: Data, IdUtente, IdServico, Custo, IdMedico -> {V,F}
+
 remover_consulta(X,Y,W,Z,M) :- involucao(consulta(X,Y,W,Z,M)).
+
+% Extensao do predicao remover_medico: IdMedico, Nome, Especialidades, Instituicoes -> {V,F}
+
 remover_medico(X,Y,W,Z) :- involucao(medico(X,Y,W,Z)).
 
 %------------------------3--------------------------
+
 % Extensao do predicado identificaInstituicoes: ListaInstituicoes -> {V,F}
 
 identificaInstituicoes(Lista) :- solucoes(I,servico(_,_,I,_),L),removeRepetidos(L,Lista).
@@ -198,42 +224,56 @@ identificaInstituicoes(Lista) :- solucoes(I,servico(_,_,I,_),L),removeRepetidos(
 %------------------------4--------------------------
 
 % Extensao do predicado identificar_utenteID: IDUt,Utente -> {V,F}
+
 identificar_utenteID(ID, R) :- solucoes((ID, N, I, C), utente(ID, N, I, C), R).
 
 % Extensao do predicado identificar_utenteNome: Nome,ListaUtentes -> {V,F}
+
 identificar_utenteNome(NOME, R) :- solucoes((ID, NOME, I, C), utente(ID, NOME, I, C), R).
 
 % Extensao do predicado identificar_utenteIdade: Idade,ListaUtentes -> {V,F}
+
 identificar_utenteIdade(IDADE, R) :- solucoes((ID, N, IDADE, C), utente(ID, N, IDADE, C), R).
 
 % Extensao do predicado identificar_utenteCidade: Cidade,ListaUtentes -> {V,F}
+
 identificar_utenteCidade(CIDADE, R) :- solucoes((ID, N, I, CIDADE), utente(ID, N, I, CIDADE), R).
 
-
 % Extensao do predicado identificar_servicoID: IDServ,Servico -> {V,F}
+
 identificar_servicoID(ID, R) :- solucoes((ID, D, I, C), servico(ID, D, I, C), R).
 
 % Extensao do predicado identificar_servicoDescricao: Descricao,Servico -> {V,F}
+
 identificar_servicoDescricao(DESC, R) :- solucoes((ID, DESC, I, C), servico(ID, DESC, I, C), R).
 
 % Extensao do predicado identificar_servicoInstituicao: Instituicao,ListaServicos -> {V,F}
+
 identificar_servicoInstituicao(INST, R) :- solucoes((ID, D, INST, C), servico(ID, D, INST, C), R).
 
 % Extensao do predicado identificar_servicoCidade: Cidade,ListaServicos -> {V,F}
+
 identificar_servicoCidade(CITY, R) :- solucoes((ID, D, I, CITY), servico(ID, D, I, CITY), R).
 
-
 % Extensao do predicado identificar_consultaData: Data,ListaConsultas -> {V,F}
-identificar_consultaData(DATE, R) :- solucoes((DATE, Idutente, Idservico, Custo,Idmedico), consulta(DATE, Idutente, Idservico, Custo,Idmedico), R).
+
+identificar_consultaData(DATE, R) :- solucoes((DATE, Idutente, Idservico, Custo,Idmedico), 
+                                        consulta(DATE, Idutente, Idservico, Custo,Idmedico), R).
 
 % Extensao do predicado identificar_consultaIDUtente: IdUt,ListaConsultas -> {V,F}
-identificar_consultaIDUtente(IDU, R) :- solucoes((D, IDU, Idservico, Custo,Idmedico), consulta(D, IDU, Idservico, Custo,Idmedico), R).
+
+identificar_consultaIDUtente(IDU, R) :- solucoes((D, IDU, Idservico, Custo,Idmedico), 
+                                            consulta(D, IDU, Idservico, Custo,Idmedico), R).
 
 % Extensao do predicado identificar_consultaIDServico: IdServ,ListaConsultas -> {V,F}
-identificar_consultaIDServico(IDS, R) :- solucoes((D, Idutente, IDS, Custo,Idmedico), consulta(D, Idutente, IDS, Custo,Idmedico), R).
+
+identificar_consultaIDServico(IDS, R) :- solucoes((D, Idutente, IDS, Custo,Idmedico), 
+                                            consulta(D, Idutente, IDS, Custo,Idmedico), R).
 
 % Extensao do predicado identificar_consultaCusto: Custo,ListaConsultas -> {V,F}
-identificar_consultaCusto(CUSTO, R) :- solucoes((D, Idutente, Idservico, CUSTO,Idmedico), consulta(D, Idutente, Idservico, CUSTO,Idmedico), R).
+
+identificar_consultaCusto(CUSTO, R) :- solucoes((D, Idutente, Idservico, CUSTO,Idmedico), 
+                                            consulta(D, Idutente, Idservico, CUSTO,Idmedico), R).
 
 %------------------------5--------------------------
 % Extensao do predicado servicosInstituicao: Instituicao, ListaServicos -> {V,F}
