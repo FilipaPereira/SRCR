@@ -127,6 +127,20 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
                             (solucoes( (IDM,E),(medico(IDM,_,E,_)),S ),
                              comprimento( S,N ), N >= 1).
 
+-consulta( D,IDU,IDS,C,IDM ) ::
+                            (solucoes( (D,IDU,IDS),(consulta(D,IDU,IDS,_,_)),S ),
+                            comprimento( S,N ), N == 1).
+
+-utente( ID,NO,I,C ) :: (solucoes( ID,consulta(_,ID,_,_,_),S ),
+                        comprimento( S,N ), N == 0).
+
+-servico( ID,D,I,C ) :: (solucoes( ID,consulta(_,_,ID,_,_),S ),
+                        comprimento( S,N ), N == 0).
+
+-medico( ID,N,E,I ) :: (solucoes( ID,consulta(_,_,_,_,ID),S ),
+                        comprimento( S,N ), N == 0).
+
+
 %----------------------AUXILIARES----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
 
