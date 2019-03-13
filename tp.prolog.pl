@@ -361,7 +361,7 @@ servicosUtente(IDU,LR) :- solucoes(IDS,consulta(_,IDU,IDS,_,_),W),removeRepetido
 
 %--- Auxiliar da 7
 encontrarServicoU([],[]).
-encontrarServicoU([H|T],R) :- solucoes((H,N,I,M),servico(H,N,I,M),W),encontrarServicoU(T,S),concatenar(S,W,R).
+encontrarServicoU([H|T],R) :- identificar_servicoID(H,W),encontrarServicoU(T,S),concatenar(S,W,R).
 
 %------------------------8--------------------------
 % Extensao do predicado custoUtente: IDUt,Custo -> {V,F}
