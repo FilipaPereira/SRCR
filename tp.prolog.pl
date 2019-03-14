@@ -115,8 +115,10 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
 
 +medico( ID,N,E,I ) :: (solucoes( ID,(medico(ID,_,_,_)),S ),
                       comprimento( S,N ), N == 1).
+
 -medico( ID,N,E,I ) :: (solucoes( ID,(medico(ID,_,_,_)),S ),
                       comprimento( S,N ), N == 1).
+
 
 +consulta( D,IDU,IDS,C,IDM ) ::
                             (utente(IDU,_,_,_),
