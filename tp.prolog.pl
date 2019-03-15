@@ -376,15 +376,27 @@ servicosUtentes([H|T],R) :- utentesServico(H,W),servicosUtentes(T,S),concatenar(
 
 %------------------------7--------------------------
 
-% Extensao do predicado servicosUtente: IdUt,ListaServicos ->{V,F}
+% Extensao do predicado consultaUtente: IdUt,ListaServicos ->{V,F}
 
-servicosUtente([],[]).
-servicosUtente(IDU,LR) :- solucoes(IDS,consulta(_,IDU,IDS,_,_),W),removeRepetidos(W,U),encontrarServicoU(U,LR).
+consultaUtente([],[]).
+consultaUtente(IDU,LR) :- solucoes((X,IDU,Y,Z,P),consulta(X,IDU,Y,Z,P),LR).
+
+
+% Extensao do predicado consultaInstituicao: Instituicao,ListaServicos ->{V,F}
+
+consultaInstituicao([],[]).
+consultaInstituicao(I,LR) :- solucoes(ID,servico(ID,_,I,_),R),removeRepetidos(R,L),encontrarConsultaS(L,LR).
+
+
+% Extensao do predicado consultaCidade: Instituicao,ListaServicos ->{V,F}
+
+consultaCidade([],[]).
+consultaCidade(C,LR) :- solucoes(ID,servico(ID,_,_,C),R),removeRepetidos(R,L),encontrarConsultaS(L,LR).
 
 
 %--- Auxiliar da 7
-encontrarServicoU([],[]).
-encontrarServicoU([H|T],R) :- identificar_servicoID(H,W),encontrarServicoU(T,S),concatenar(S,W,R).
+encontrarConsultaS([],[]).
+encontrarConsultaS([H|T],R) :- identificar_consultaIDServico(H,W),encontrarConsultaS(T,S),concatenar(S,W,R).
 
 %------------------------8--------------------------
 % Extensao do predicado custoUtente: IDUt,Custo -> {V,F}
