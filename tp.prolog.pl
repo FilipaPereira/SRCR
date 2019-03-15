@@ -146,7 +146,7 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
 %----------------------AUXILIARES----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
 
-pertence(X,[H | T]) :- X = H.
+pertence(X,[H | T]) :- X == H.
 pertence(X,[H | T]) :- pertence(X,T),X \= H.
 
 
@@ -412,3 +412,17 @@ custoInstituicao(I,R) :- solucoes(IDServ,servico(IDServ,_,I,_),Lista), custoList
 
 custoListaServ([],0).
 custoListaServ([H | T],Res) :- custoServico(H,S), custoListaServ(T,B), Res is S+B.
+
+
+%-----------EXTRA
+% Extensao do predicado consultasMedico: IDMedico,ListaConsultas -> {V,F}
+
+consultasMedico(IDMed,R) :- solucoes((D,IDUt,IDServ,C),consulta(D,IDUt,IDServ,C,IDMed),R).
+
+% Extensao do predicado medicosEspecialidade: Especialidade,ListaMedicos -> {V,F}
+
+medicosEspecialidade(E,L) :- solucoes(Nome,(medico(_,Nome,LE,_),pertence(E,LE)),L).
+
+% Extensao do predicado medicosInstituicao: Instituicao,ListaMedicos -> {V,F}
+
+medicosInstituicao(I,L) :- solucoes(Nome,(medico(_,Nome,_,LI),pertence(I,LI)),L).
