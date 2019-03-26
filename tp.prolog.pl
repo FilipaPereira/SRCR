@@ -291,25 +291,25 @@ identificar_servicoCidade(CITY, R) :- solucoes((ID, D, I, CITY), servico(ID, D, 
 
 % Extensao do predicado identificar_consultaData: Data,ListaConsultas -> {V,F}
 
-identificar_consultaData(DATE, R) :- solucoes((DATE, Idutente, Idservico, Custo,Idmedico), 
+identificar_consultaData(DATE, R) :- solucoes((DATE, Idutente, Idservico, Custo,Idmedico),
                                         consulta(DATE, Idutente, Idservico, Custo,Idmedico), R).
 
 
 % Extensao do predicado identificar_consultaIDUtente: IdUt,ListaConsultas -> {V,F}
 
-identificar_consultaIDUtente(IDU, R) :- solucoes((D, IDU, Idservico, Custo,Idmedico), 
+identificar_consultaIDUtente(IDU, R) :- solucoes((D, IDU, Idservico, Custo,Idmedico),
                                             consulta(D, IDU, Idservico, Custo,Idmedico), R).
 
 
 % Extensao do predicado identificar_consultaIDServico: IdServ,ListaConsultas -> {V,F}
 
-identificar_consultaIDServico(IDS, R) :- solucoes((D, Idutente, IDS, Custo,Idmedico), 
+identificar_consultaIDServico(IDS, R) :- solucoes((D, Idutente, IDS, Custo,Idmedico),
                                             consulta(D, Idutente, IDS, Custo,Idmedico), R).
 
 
 % Extensao do predicado identificar_consultaCusto: Custo,ListaConsultas -> {V,F}
 
-identificar_consultaCusto(CUSTO, R) :- solucoes((D, Idutente, Idservico, CUSTO,Idmedico), 
+identificar_consultaCusto(CUSTO, R) :- solucoes((D, Idutente, Idservico, CUSTO,Idmedico),
                                             consulta(D, Idutente, Idservico, CUSTO,Idmedico), R).
 
 
@@ -438,3 +438,11 @@ medicosEspecialidade(E,L) :- solucoes(Nome,(medico(_,Nome,LE,_),pertence(E,LE)),
 % Extensao do predicado medicosInstituicao: Instituicao,ListaMedicos -> {V,F}
 
 medicosInstituicao(I,L) :- solucoes(Nome,(medico(_,Nome,_,LI),pertence(I,LI)),L).
+
+% Extensao do predicado medicosCusto: IdMedico,Custo -> {V,F}
+
+medicosCusto(IDMed,C) :- solucoes(Custo,consulta(_,_,_,Custo,IDMed),R), somaLista(R,C).
+
+% Extensao do predicado utentesEspecialidade: Especialidade,ListaUtentes -> {V,F}
+
+utentesEspecialidade(E,L) :- solucoes(IdServ,servico(IdServ,E,_,_),S), servicosUtentes(S,R).
