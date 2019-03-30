@@ -445,4 +445,4 @@ medicosCusto(IDMed,C) :- solucoes(Custo,consulta(_,_,_,Custo,IDMed),R), somaList
 
 % Extensao do predicado utentesEspecialidade: Especialidade,ListaUtentes -> {V,F}
 
-utentesEspecialidade(E,L) :- solucoes(IdServ,servico(IdServ,E,_,_),S), servicosUtentes(S,R).
+utentesEspecialidade(E,L) :- solucoes(IdServ,servico(IdServ,E,_,_),S), servicosUtentes(S,L).
