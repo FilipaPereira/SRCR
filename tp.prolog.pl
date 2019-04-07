@@ -176,6 +176,19 @@ concatenar([],L,L).
 concatenar(L,[],L).
 concatenar([H | T], L, [H | R]) :- concatenar(T,L,R).
 
+% Extensao do meta-predicado demo: Questao,Resposta -> {V, F, D}
+
+demo( Questao,verdadeiro ) :- Questao.
+demo( Questao, falso ) :- -Questao.
+demo( Questao,desconhecido ) :-
+    nao( Questao ),
+    nao( -Questao ).
+
+% Extensao do meta-predicado nao: Questao -> {V, F, D}
+
+nao( Q ) :- Q, !, fail.
+nao( Q ).
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite a evolucao do conhecimento
 
@@ -446,3 +459,20 @@ medicosCusto(IDMed,C) :- solucoes(Custo,consulta(_,_,_,Custo,IDMed),R), somaList
 % Extensao do predicado utentesEspecialidade: Especialidade,ListaUtentes -> {V,F}
 
 utentesEspecialidade(E,L) :- solucoes(IdServ,servico(IdServ,E,_,_),S), servicosUtentes(S,L).
+
+
+
+%-----------CONHECIMENTO NEGATIVO
+
+utente(IDUt, Nome, Idade, Cidade) :- nao(utente(IDUt, Nome, Idade, Cidade)), 
+                                      nao(excecao(utente(IDUt, Nome, Idade, Cidade))).
+
+servico(IDServ,Descricao,Instituicao,Cidade) :- nao(servico(IDServ,Descricao,Instituicao,Cidade)),
+                                                nao(excecao(servico(IDServ,Descricao,Instituicao,Cidade))).
+
+consulta(Data, IDUt,IDServ,Custo,IDMed) :- nao(consulta(Data, IDUt,IDServ,Custo,IDMed)),
+                                            nao(excecao(servico(Data, IDUt,IDServ,Custo,IDMed))).
+
+medico(IDMed,Nome,Especialidades,Instituicoes) :- nao(medico(IDMed,Nome,Especialidades,Instituicoes)),
+                                                  nao(excecao(medico(IDMed,Nome,Especialidades,Instituicoes))).                                            
+
