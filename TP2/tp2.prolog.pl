@@ -22,6 +22,7 @@
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utente: IDUt,Nome,Idade,Morada -> {V,F,D}
+
 utente(1,'Ana Santos',34,'Rua São Gonçalo - S.Vicente - Braga').
 utente(2,'Bruno Mendonça',23,'Rua de Santa Catarina - Santo Ildefonso e Bonfim - Porto').
 utente(3,'Carla Martins',29,'Rua de Santa Maria - Oliveira do Castelo - Guimarães').
@@ -37,8 +38,11 @@ utente(12,'Sérgio Gonçalves',16,'Rua de Quebra Costas - Almedina - Coimbra').
 utente(13,'João Pereira',24,'Rua do Souto - Sé - Braga').
 utente(14,'Henrique Castro',83,'Rua da Cedofeita - Vitória e Cedofeita - Porto').
 utente(15,'Sara Fernandes',27,'Rua Garret - Santa Maria Maior - Lisboa').
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado prestador: IDPrest,Nome,Especialidade,Instituicao -> {V,F,D}
+
 prestador(1,'José Moreira',['Dermatologia','Ortopedia'],['Hospital S.José']).
 prestador(2,'Cristina Félix',['Psiquiatria','Otorrinolaringologia'],['Hospital S.José','Hospital da Luz']).
 prestador(3,'Helena Pereira',['Oftalmologia','Dermatologia'],['Centro Hospitalar e Universitário de Coimbra']).
@@ -50,8 +54,11 @@ prestador(8,'Guilherme Cruz',['Otorrinolaringologia'],['Hospital de Braga']).
 prestador(9,'Sofia Lopes',['Dermatologia','Oftalmologia'],['Hospital de Santa Maria']).
 prestador(10,'Manuel Marques',['Ortopedia'],['Hospital S.João']).
 prestador(11,'Adriana Oliveira',['Cardiologia'],['Hospital S.João']).
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado cuidado: Data, IDUt,IDPrest,Descricao,Custo -> {V,F,D}
+
 cuidado('10-11-2018',1,5,'Ginecologia',30).
 cuidado('18-03-2018',2,10,'Ortopedia',47).
 cuidado('09-02-2019',3,5,'Ginecologia',30).
@@ -72,8 +79,11 @@ cuidado('18-07-2018',2,9,'Dermatologia',50).
 cuidado('02-03-2019',11,4,'Cardiologia',30).
 cuidado('28-09-2018',3,4,'Cardiologia',25).
 cuidado('12-01-2019',15,2,'Otorrinolaringologia',25).
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado servico: IDServ,Descricao,Instituicao,Cidade -> {V,F,D}
+
 servico(1,'Oftalmologia','Hospital de Braga','Braga').
 servico(2,'Ginecologia','Centro de Saúde de Maximinos','Braga').
 servico(3,'Cardiologia','Hospital da Senhora da Oliveira Guimarães','Guimarães').
@@ -89,8 +99,9 @@ servico(12,'Otorrinolaringologia','Hospital S.José' ,'Lisboa').
 servico(13,'Ginecologia','Hospital da Senhora da Oliveira Guimarães','Guimarães').
 servico(14,'Psiquiatria','Hospital da Luz','Lisboa').
 servico(15,'Dermatologia','Hospital de Santa Maria','Porto').
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 % Extensao do meta-predicado demo: Questao,Resposta -> {V, F, D}
 
@@ -122,7 +133,112 @@ insercao( T ) :- retract( T ),!,fail.
 teste( [] ).
 teste( [R|LR] ) :- R, teste( LR ).
 
-%----------------------AUXILIARES----------------------------------
+
+
+% ------------------------------ INVARIANTES -------------------------------%
+
+solucoes(X,Y,Z) :- findall(X,Y,Z).
+
+% Extensao do predicado comprimento: Lista, Resultado -> {V,F}
+comprimento( [],0 ).
+comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
+
+
+% O ID do utente é único
++utente( ID,NO,I,C ) :: (solucoes( ID,utente(ID,_,_,_),S ),
+                        comprimento( S,N ), N == 1).
+
+% Não é possível remover um utente se ele não existir
+-utente( ID,NO,I,C ) :: (solucoes( ID,utente(ID,_,_,_),S ),
+                         comprimento( S,N ), N == 1).
+
+% O ID do prestador é único
++prestador( ID,N,E,I ) :: (solucoes( ID,(prestador(ID,_,_,_)),S ),
+                      comprimento( S,N ), N == 1).
+
+% Não é possível remover um prestador se ele não existir
+-prestador( ID,N,E,I ) :: (solucoes( ID,(prestador(ID,_,_,_)),S ),
+                      comprimento( S,N ), N == 1).
+
+% Cada cuidado é relativo a um utente, prestador e serviço existentes
++cuidado( ID,IDU,IDP,D,C ) ::
+                            (utente(IDU,_,_,_),
+                            prestador(IDP,_,_,_)),
+                            servico(_,D,_,_),.
+
+% Só pode ser inserido um cuidado se existirem o médico e o serviço a si associados
++cuidado( ID,IDU,IDP,D,C ) ::
+                            (solucoes( (IDP,E),(prestador(IDP,_,E,_)),S ),
+                             comprimento( S,N ), N >= 1).
+
+% Não é possível remover um cuidado se ele não existir
+-cuidado( ID,IDU,IDP,D,C ) ::
+                            (solucoes( (ID,IDU,D),(cuidados(ID,IDU,_,D,_)),S ),
+                            comprimento( S,N ), N == 1).
+
+% Não é possível remover um utente se houver cuidados em seu nome
+-utente( ID,NO,I,C ) :: (solucoes( ID,cuidado(_,ID,_,_,_),S ),
+                        comprimento( S,N ), N == 0).
+
+% Não é possível remover um serviço se houver cuidados relativos a si
+-servico( ID,D,I,C ) :: (solucoes( ID,consulta(_,_,ID,_,_),S ),
+                        comprimento( S,N ), N == 0).
+
+% Não é possível remover um medico se houver cuidados relativos a si
+-prestador( ID,N,E,I ) :: (solucoes( ID,cuidado(_,_,ID,_,_),S ),
+                        comprimento( S,N ), N == 0).
+
+
+
+% ------------------------------ CONHECIMENTO NEGATIVO -------------------------------%
+
+-utente(IDUt, Nome, Idade, Morada) :-
+                nao(utente(IDUt, Nome, Idade, Morada)),
+                nao(excecao(utente(IDUt, Nome, Idade, Morada))).
+
+-cuidado(Data, IDUt, IDP, Desc, Custo) :-
+                nao(cuidado(Data, IDUt, IDP, Desc, Custo)),
+                nao(excecao(cuidado(Data, IDUt, IDP, Desc, Custo))).
+
+-prestador(IDP, Nome, Esp, Inst) :-
+                nao(prestador(IDP, Nome, Esp, Inst)),
+                nao(excecao(prestador(IDP, Nome, Esp, Inst))).
+
+
+%----------------------------- EVOLUÇÃO DE CONHECIMENTO -------------------------------%
+
+% Extensao do predicao registar_utente: IdUtente, Nome, Idade, Morada -> {V, F}
+
+registar_utente(X,Y,W,Z) :- evolucao(utente(X,Y,W,Z)).
+
+
+% Extensao do predicao remover_utente: IdUtente, Nome, Idade, Morada -> {V, F}
+
+remover_utente(X,Y,W,Z) :- involucao(utente(X,Y,W,Z)).
+
+
+% Extensao do predicao registar_cuidado: Data, IDUtente, IDPrestador, Descricao, Custo -> {V, F}
+
+registar_cuidado(V,X,Y,W,Z) :- evolucao(cuidado(V,X,Y,W,Z)).
+
+
+% Extensao do predicao remover_cuidado: Data, IDUtente, IDPrestador, Descricao, Custo -> {V, F}
+
+remover_cuidado(V,X,Y,W,Z) :- involucao(cuidado(V,X,Y,W,Z)).
+
+
+% Extensao do predicao registar_prestador: IDPrestador, Nome, Especialidade, Instituicao -> {V, F}
+
+registar_prestador(X,Y,W,Z) :- evolucao(prestador(X,Y,W,Z)).
+
+
+% Extensao do predicao remover_prestador: IDPrestador, Nome, Especialidade, Instituicao -> {V, F}
+
+remover_prestador(X,Y,W,Z) :- involucao(prestador(X,Y,W,Z)).
+
+
+   
+%-------------------------- AUXILIARES ----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
 
 pertence(X,[H | T]) :- X == H.
@@ -154,69 +270,3 @@ somaLista( [H | T],R ) :- somaLista( T,S ), R is H+S.
 concatenar([],L,L).
 concatenar(L,[],L).
 concatenar([H | T], L, [H | R]) :- concatenar(T,L,R).
-
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Invariantes
-
-solucoes(X,Y,Z) :- findall(X,Y,Z).
-
-% Extensao do predicado comprimento: Lista, Resultado -> {V,F}
-
-comprimento( [],0 ).
-comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
-
-+utente( ID,NO,I,C ) :: (solucoes( ID,utente(ID,_,_,_),S ),
-                        comprimento( S,N ), N == 1).
-
--utente( ID,NO,I,C ) :: (solucoes( ID,utente(ID,_,_,_),S ),
-                         comprimento( S,N ), N == 1).
-
-+servico( ID,D,I,C ) :: (solucoes( ID,servico(ID,_,_,_),S ),
-                         comprimento( S,N ), N == 1).
--servico( ID,D,I,C ) :: (solucoes( ID,servico(ID,_,_,_),S ),
-                         comprimento( S,N ), N == 1).
-
-+prestador( ID,N,E,I ) :: (solucoes( ID,(prestador(ID,_,_,_)),S ),
-                      comprimento( S,N ), N == 1).
-
--prestador( ID,N,E,I ) :: (solucoes( ID,(prestador(ID,_,_,_)),S ),
-                      comprimento( S,N ), N == 1).
-
-
-+cuidado( ID,IDU,IDP,D,C ) ::
-                            (utente(IDU,_,_,_),
-                            prestador(IDP,_,_,_)),
-                            servico(_,D,_,_),.
-
-+cuidado( ID,IDU,IDP,D,C ) ::
-                            (solucoes( (IDP,E),(prestador(IDP,_,E,_)),S ),
-                             comprimento( S,N ), N >= 1).
-
--cuidado( ID,IDU,IDP,D,C ) ::
-                            (solucoes( (ID,IDU,D),(cuidados(ID,IDU,_,D,_)),S ),
-                            comprimento( S,N ), N == 1).
-
--utente( ID,NO,I,C ) :: (solucoes( ID,cuidado(_,ID,_,_,_),S ),
-                        comprimento( S,N ), N == 0).
-
--servico( ID,D,I,C ) :: (solucoes( ID,consulta(_,_,ID,_,_),S ),
-                        comprimento( S,N ), N == 0).
-
--prestador( ID,N,E,I ) :: (solucoes( ID,cuidado(_,_,ID,_,_),S ),
-                        comprimento( S,N ), N == 0).
-
-%-----------CONHECIMENTO NEGATIVO
-
-utente(IDUt, Nome, Idade, Cidade) :- nao(utente(IDUt, Nome, Idade, Cidade)), 
-                                      nao(excecao(utente(IDUt, Nome, Idade, Cidade))).
-
-servico(IDServ,Descricao,Instituicao,Cidade) :- nao(servico(IDServ,Descricao,Instituicao,Cidade)),
-                                                nao(excecao(servico(IDServ,Descricao,Instituicao,Cidade))).
-
-consulta(Data, IDUt,IDServ,Custo,IDPrest) :- nao(consulta(Data, IDUt,IDServ,Custo,IDPrest)),
-                                            nao(excecao(servico(Data, IDUt,IDServ,Custo,IDPrest))).
-
-prestador(IDPrest,Nome,Especialidades,Instituicoes) :- nao(prestador(IDPrest,Nome,Especialidades,Instituicoes)),
-                                                  nao(excecao(prestador(IDPrest,Nome,Especialidades,Instituicoes))).
-
-   
