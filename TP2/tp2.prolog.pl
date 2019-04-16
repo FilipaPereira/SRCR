@@ -17,8 +17,8 @@
 :- op( 900,xfy,'::' ).
 :- dynamic utente/4.
 :- dynamic servico/4.
-:- dynamic medico/4.
-:- dynamic consulta/5.
+:- dynamic prestador/4.
+:- dynamic cuidado/5.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utente: IDUt,Nome,Idade,Morada -> {V,F,D}
@@ -183,26 +183,26 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
                       comprimento( S,N ), N == 1).
 
 
-+consulta( D,IDU,IDS,C,IDP ) ::
++cuidado( ID,IDU,IDP,D,C ) ::
                             (utente(IDU,_,_,_),
-                            servico(IDS,_,_,_),
-                            prestador(IDP,_,_,_)).
+                            prestador(IDP,_,_,_)),
+                            servico(_,D,_,_),.
 
-+consulta( D,IDU,IDS,C,IDP ) ::
++cuidado( ID,IDU,IDP,D,C ) ::
                             (solucoes( (IDP,E),(prestador(IDP,_,E,_)),S ),
                              comprimento( S,N ), N >= 1).
 
--consulta( D,IDU,IDS,C,IDP ) ::
-                            (solucoes( (D,IDU,IDS),(consulta(D,IDU,IDS,_,_)),S ),
+-cuidado( ID,IDU,IDP,D,C ) ::
+                            (solucoes( (ID,IDU,D),(cuidados(ID,IDU,_,D,_)),S ),
                             comprimento( S,N ), N == 1).
 
--utente( ID,NO,I,C ) :: (solucoes( ID,consulta(_,ID,_,_,_),S ),
+-utente( ID,NO,I,C ) :: (solucoes( ID,cuidado(_,ID,_,_,_),S ),
                         comprimento( S,N ), N == 0).
 
 -servico( ID,D,I,C ) :: (solucoes( ID,consulta(_,_,ID,_,_),S ),
                         comprimento( S,N ), N == 0).
 
--prestador( ID,N,E,I ) :: (solucoes( ID,consulta(_,_,_,_,ID),S ),
+-prestador( ID,N,E,I ) :: (solucoes( ID,cuidado(_,_,ID,_,_),S ),
                         comprimento( S,N ), N == 0).
 
 %-----------CONHECIMENTO NEGATIVO
@@ -217,4 +217,6 @@ consulta(Data, IDUt,IDServ,Custo,IDPrest) :- nao(consulta(Data, IDUt,IDServ,Cust
                                             nao(excecao(servico(Data, IDUt,IDServ,Custo,IDPrest))).
 
 prestador(IDPrest,Nome,Especialidades,Instituicoes) :- nao(prestador(IDPrest,Nome,Especialidades,Instituicoes)),
-                                                  nao(excecao(prestador(IDPrest,Nome,Especialidades,Instituicoes))).      
+                                                  nao(excecao(prestador(IDPrest,Nome,Especialidades,Instituicoes))).
+
+   
