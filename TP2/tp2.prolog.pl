@@ -20,6 +20,10 @@
 :- dynamic prestador/4.
 :- dynamic cuidado/5.
 
+%Extensao do predicado utente: #IdUt, Nome, Idade, Morada ↝ { 𝕍, 𝔽, 𝔻 }
+%Extensao do predicado prestador: #IdPrest, Nome, Especialidade, Instituição ↝ { 𝕍, 𝔽, 𝔻 }
+%Extensao do predicado cuidado: Data, #IdUt, #IdPrest, Descrição, Custo ↝ { 𝕍, 𝔽, 𝔻 }
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utente: IDUt,Nome,Idade,Morada -> {V,F,D}
 
@@ -41,7 +45,7 @@ utente(15,'Sara Fernandes',27,'Rua Garret - Santa Maria Maior - Lisboa').
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado prestador: IDPrest,Nome,Especialidade,Instituicao -> {V,F,D}
+% Extensao do predicado prestador: IDPrest,Nome,Especialidade,Instituicao -> {V,F, D}
 
 prestador(1,'José Moreira',['Dermatologia','Ortopedia'],['Hospital S.José']).
 prestador(2,'Cristina Félix',['Psiquiatria','Otorrinolaringologia'],['Hospital S.José','Hospital da Luz']).
@@ -139,6 +143,9 @@ teste( [R|LR] ) :- R, teste( LR ).
 
 solucoes(X,Y,Z) :- findall(X,Y,Z).
 
+% Datas válidas
++data(Dia, Mes, Ano) :: (Dia>=0; Dia=<31; Mes>=0; Mes=<12; Ano>=0).
+
 % Extensao do predicado comprimento: Lista, Resultado -> {V,F}
 comprimento( [],0 ).
 comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
@@ -161,18 +168,18 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
                       comprimento( S,N ), N == 1).
 
 % Cada cuidado é relativo a um utente, prestador e serviço existentes
-+cuidado( ID,IDU,IDP,D,C ) ::
++cuidado( ID,IDU,IDPrest,D,C ) ::
                             (utente(IDU,_,_,_),
-                            prestador(IDP,_,_,_)),
+                            prestador(IDPrest,_,_,_)),
                             servico(_,D,_,_),.
 
 % Só pode ser inserido um cuidado se existirem o médico e o serviço a si associados
-+cuidado( ID,IDU,IDP,D,C ) ::
-                            (solucoes( (IDP,E),(prestador(IDP,_,E,_)),S ),
++cuidado( ID,IDU,IDPrest,D,C ) ::
+                            (solucoes( (IDPrest,E),(prestador(IDPrest,_,E,_)),S ),
                              comprimento( S,N ), N >= 1).
 
 % Não é possível remover um cuidado se ele não existir
--cuidado( ID,IDU,IDP,D,C ) ::
+-cuidado( ID,IDU,IDPrest,D,C ) ::
                             (solucoes( (ID,IDU,D),(cuidados(ID,IDU,_,D,_)),S ),
                             comprimento( S,N ), N == 1).
 
@@ -181,29 +188,122 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
                         comprimento( S,N ), N == 0).
 
 % Não é possível remover um serviço se houver cuidados relativos a si
--servico( ID,D,I,C ) :: (solucoes( ID,consulta(_,_,ID,_,_),S ),
+-servico( ID,D,I,C ) :: (solucoes( ID,cuidado(_,_,ID,_,_),S ),
                         comprimento( S,N ), N == 0).
 
-% Não é possível remover um medico se houver cuidados relativos a si
+% Não é possível remover um prestador se houver cuidados relativos a si
 -prestador( ID,N,E,I ) :: (solucoes( ID,cuidado(_,_,ID,_,_),S ),
                         comprimento( S,N ), N == 0).
 
 
 
-% ------------------------------ CONHECIMENTO NEGATIVO -------------------------------%
+% ------------------------------ CONHECIMENTO NEGATIVO -------------------------------
 
 -utente(IDUt, Nome, Idade, Morada) :-
                 nao(utente(IDUt, Nome, Idade, Morada)),
                 nao(excecao(utente(IDUt, Nome, Idade, Morada))).
 
--cuidado(Data, IDUt, IDP, Desc, Custo) :-
-                nao(cuidado(Data, IDUt, IDP, Desc, Custo)),
-                nao(excecao(cuidado(Data, IDUt, IDP, Desc, Custo))).
+-cuidado(Data, IDUt, IDPrest, Desc, Custo) :-
+                nao(cuidado(Data, IDUt, IDPrest, Desc, Custo)),
+                nao(excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo))).
 
--prestador(IDP, Nome, Esp, Inst) :-
-                nao(prestador(IDP, Nome, Esp, Inst)),
-                nao(excecao(prestador(IDP, Nome, Esp, Inst))).
+-prestador(IDPrest, Nome, Esp, Inst) :-
+                nao(prestador(IDPrest, Nome, Esp, Inst)),
+                nao(excecao(prestador(IDPrest, Nome, Esp, Inst))).
 
+-servico(IDServ, Desc, Inst, Cidade) :-
+                    nao(servico(IDServ, Desc, Inst, Cidade)),
+                    nao(excecao(servico(IDServ, Desc, Inst, Cidade))).
+
+
+%Excecoes associadas
+-utente(30,'Filonema Guimarães', 20, 'Rua do Campo').
+-servico(40,'Cardiologia','Clínica da Fonte Nova','Braga')
+-cuidado(data(05,05,2005),1,17,87,7).
+-prestador(9,'Raul Fernandes', ['Cardiologia'], ['Centro de Saúde de Maximinos','Hospital de Braga']).
+
+% ------------------------------ CONHECIMENTO INCERTO -------------------------------
+
+% Desconhecimento da cidade do utente.
+utente(10,'André Campos',42,cidade_desconhecida).
+
+% Desconhecimento da idade do utente, mas com o conhecimento de que não é 45 anos.
+utente(3,'Carla Martins',idade_desconhecida,'Rua de Santa Maria - Oliveira do Castelo - Guimarães').
+-utente(3,'Carla Martins',45,'Rua de Santa Maria - Oliveira do Castelo - Guimarães').
+
+% Desconhecimento do custo associado a um cuidado.
+cuidado(data(09, 02, 2019),3,5,'Ginecologia',custo_desconhecido).
+
+% Desconhecimento do utente associado a um cuidado, mas com o conhecimento de que não é o utente com id=14.
+cuidado(data(11, 04, 2018),utente_desconhecido,8,'Otorrinolaringologia',15).
+-cuidado(data(11, 04, 2018),15,8,'Otorrinolaringologia',15).
+
+% Desconhecimento das especialidades de um médico.
+prestador(11,'Adriana Oliveira',especialidades_desconhecidas,['Hospital S.João']).
+
+%Desconhecimento da data associada a um cuidado.
+cuidado(data_desconhecida,11,4,'Cardiologia',30).
+
+%Desconhecimento da instituição associada a um serviço.
+servico(15,'Dermatologia',instituicao_desconhecida,'Porto').
+
+% Conjunto das exceções associadas.
+excecao(utente(IDUt, Nome, Idade, Cidade)) :- utente(IDUt,Nome,Idade,cidade_desconhecida).
+excecao(utente(IDUt, Nome, Idade, Cidade)) :- utente(IDUt,Nome,idade_desconhecida,Cidade).
+excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo)) :- cuidado(Data, IDUt, IDPrest, Desc, custo_desconhecido).
+excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo)) :- cuidado(Data, utente_desconhecido, IDPrest, Desc, Custo).
+excecao(prestador(IdPrest, Nome, Esp, Inst)) :- medico(IdPrest, Nome, especialidades_desconhecidas, Inst).
+excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo)) :- cuidado(data_desconhecida, IDUt, IDPrest, Desc, Custo).
+excecao(servico(IDServ, Desc, Inst, Cidade)) :- servico(IDServ, Desc, instituicao_desconhecida, Cidade).
+
+% ------------------------------ CONHECIMENTO IMPRECISO -------------------------------
+
+% Tendo conhecimento apenas do ano de nascimento do Luís é impossível confirmar 
+% a idade deste, sendo, portanto, 50 ou 51 anos. 
+
+excecao(utente(17,'Ricardo Campos',50,'Rua dos Chãos - S.João do Souto - Braga')).
+excecao(utente(17,'Ricardo Campos',51,'Rua dos Chãos - S.João do Souto - Braga')).
+
+% A Dra. Albertina abriu uma clínica que oferece serviços de uma só 
+% especialidade. No entato, a Dra. Albertina tirou várias especialides: Cardiologia,
+% Otorrinolaringologia e Ginecologia. Desta forma, o serviço oferecido pela clínica
+% só pode ser um destes referidos.
+
+excecao(servico(12,'Cardiologia','Clínica Médica do Bolhão','Porto')).
+excecao(servico(12,'Otorrinolaringologia','Clínica Médica do Bolhão','Porto')).
+excecao(servico(12,'Ginecologia','Clínica Médica do Bolhão','Porto')).
+
+% Devido a um problema na base de dados da Clínica, foi perdido o dia referente
+% a um determinado cuidado, sabendo-se agora apenas o ano e mês deste.
+
+excecao(cuidado(data(Dia, 09, 2018), 3, 4, 'Cardiologia', 25)) :- Dia>=1, Dia=<31.
+
+% Devido a um problema na base de dados da Clínica, foi perdido o mês referente
+% a um determinado cuidado, sabendo-se agora apenas o dia e o ano deste.
+
+excecao(cuidado(data(28, Mes, 2016), 3, 4, 'Cardiologia', 25)) :- Mes>=1, Mes=<31.
+
+% A Maria disse à mãe que na sua última consulta de Otorrinolaringologia gastou cerca de 200€.
+% A mãe da Maria não sabe o valor certo do custo associado à consulta da filha, mas sabe todas as 
+% informações restantes.
+
+excecao(cuidado(data(20,07,2015),8,6,'Otorrinolaringologia', Custo)) :- cerca_de(Custo,200).
+
+% A Dra. Fátima tem 3 clínicas: Clínica Privada do Centro, Clínica do Norte e Clínica do Sul.
+% No entanto, ela só só trabalha numa destas clínicas.
+
+excecao(prestador(20, 'Fátima Oliveira', 'Cardiologia', ['Clínica Privada do Centro'])).
+excecao(prestador(20, 'Fátima Oliveira', 'Cardiologia', ['Clínica do Norte'])).
+excecao(prestador(20, 'Fátima Oliveira', 'Cardiologia', ['Clínica do Sul'])).
+
+% A Sra. Ana Santos teve uma consulta de Cardiologia no dia 20 de Abril e quer saber o nome do prestador que a atenteu.
+% Devido a uma falha no sistema, não houve registo da mesma. No entanto, sabe-se que a consulta foi dada pelo
+% Dr. Rodrigo Vieira, ou pela Dra. Adriana Oliveira ou pela Dra. Susana Costa, uma vez que são os únicos
+% especializados em Cardiologia.
+
+excecao(cuidado(data(20,04,2018), 1, 4, 'Cardiologia', ['Clínica do Sul'])).
+excecao(cuidado(data(20,04,2018), 1, 7, 'Cardiologia', ['Clínica do Sul'])).
+excecao(cuidado(data(20,04,2018), 1, 11, 'Cardiologia', ['Clínica do Sul'])).
 
 %----------------------------- EVOLUÇÃO DE CONHECIMENTO -------------------------------%
 
@@ -217,26 +317,24 @@ registar_utente(X,Y,W,Z) :- evolucao(utente(X,Y,W,Z)).
 remover_utente(X,Y,W,Z) :- involucao(utente(X,Y,W,Z)).
 
 
-% Extensao do predicao registar_cuidado: Data, IDUtente, IDPrestador, Descricao, Custo -> {V, F}
+% Extensao do predicao registar_cuidado: Data, IDUtente, IDPrestedico, Descricao, Custo -> {V, F}
 
 registar_cuidado(V,X,Y,W,Z) :- evolucao(cuidado(V,X,Y,W,Z)).
 
 
-% Extensao do predicao remover_cuidado: Data, IDUtente, IDPrestador, Descricao, Custo -> {V, F}
+% Extensao do predicao remover_cuidado: Data, IDUtente, IDPrestedico, Descricao, Custo -> {V, F}
 
 remover_cuidado(V,X,Y,W,Z) :- involucao(cuidado(V,X,Y,W,Z)).
 
 
-% Extensao do predicao registar_prestador: IDPrestador, Nome, Especialidade, Instituicao -> {V, F}
+% Extensao do predicao registar_prestador: IDPrestedico, Nome, Especialidade, Instituicao -> {V, F}
 
 registar_prestador(X,Y,W,Z) :- evolucao(prestador(X,Y,W,Z)).
 
 
-% Extensao do predicao remover_prestador: IDPrestador, Nome, Especialidade, Instituicao -> {V, F}
+% Extensao do predicao remover_prestador: IDPrestedico, Nome, Especialidade, Instituicao -> {V, F}
 
 remover_prestador(X,Y,W,Z) :- involucao(prestador(X,Y,W,Z)).
-
-
    
 %-------------------------- AUXILIARES ----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
@@ -270,3 +368,9 @@ somaLista( [H | T],R ) :- somaLista( T,S ), R is H+S.
 concatenar([],L,L).
 concatenar(L,[],L).
 concatenar([H | T], L, [H | R]) :- concatenar(T,L,R).
+
+
+%Extensao do predicado cerca_de
+
+cerca_de(X, Min, Max) :- Min is X * 0.8,
+                            Max is X * 1.2.
