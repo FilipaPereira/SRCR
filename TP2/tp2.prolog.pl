@@ -503,7 +503,7 @@ remover_prestador(X,Y,W,Z) :- involucao(prestador(X,Y,W,Z)).
 
 %--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO INCERTO ------------------------------------%
 
-%permitir idade desconhecida
+%permitir inserir conhecimento incerto sobre a idade dos utentes
 
 evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-  
     Type == incerto,
@@ -512,7 +512,16 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
     insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
         utente(Id, Nome, Idd, Morada))).
 
-%permitir morada desconhecida
+% permitir remover conhecimento incerto sobre a idade dos utentes
+
+involucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
+    Type == incerto,
+    Incerto == idade,
+    involucao(utente(Id, Nome, Idade, Morada), positivo),
+    remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
+        utente(Id, Nome, Idd, Morada))).
+
+%permitir inserir conhecimento incerto sobre a morada dos utentes
 
 evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :- 
     Type == incerto,
@@ -521,7 +530,16 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
     insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
         utente(Id, Nome, Idade, Mrd))).
 
-%permitir instituição desconhecida no prestador
+%permitir remover conhecimento incerto sobre a morada dos utentes
+
+involucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
+    Type == incerto,
+    Incerto == morada,
+    involucao(utente(Id, Nome, Idade, Morada), positivo),
+    remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
+        utente(Id, Nome, Idade, Mrd))).
+
+%permitir inserir conhecimento incerto sobre a instituição dos prestadores
 
 evolucao(prestador(Id, Nome, Especialidade, Instituicao), Type, Incerto) :-
     Type == incerto,
@@ -530,7 +548,16 @@ evolucao(prestador(Id, Nome, Especialidade, Instituicao), Type, Incerto) :-
     insercao((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
         prestador(Id, Nome, Especialidade, Inst))).
 
-%permitir instituição desconhecida no servico
+%permitir remover conhecimento incerto sobre a instituição dos prestadores
+
+involucao(prestador(Id, Nome, Especialidade, Instituicao), Type, Incerto) :-
+    Type == incerto,
+    Incerto == instituicao,
+    involucao(prestador(Id, Nome, Especialidade, Instituicao), positivo),
+    remocao((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
+        prestador(Id, Nome, Especialidade, Inst))).
+
+%permitir inserir conhecimento incerto sobre a instituição dos serviços
 
 evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Incerto) :-
     Type == incerto,
@@ -539,7 +566,16 @@ evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Incerto) :-
     insercao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
         servico(IDServ,Descricao,Inst,Cidade))).
 
-%permitir custo desconhecido
+%permitir remover conhecimento incerto sobre a instituição dos serviços
+
+involucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Incerto) :-
+    Type == incerto,
+    Incerto == instituicao,
+    involucao(servico(IDServ,Descricao,Instituicao,Cidade), positivo),
+    remocao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
+        servico(IDServ,Descricao,Inst,Cidade))).
+
+%permitir inserir conhecimento incerto sobre o custo dos cuidados
 
 evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     Type == incerto,
@@ -548,13 +584,31 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Descricao, C))).
 
-%permitir descricao desconhecida
+%permitir remover conhecimento incerto sobre o custo dos cuidados
+
+involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
+    Type == incerto,
+    Incerto == custo,
+    involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
+    remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+        cuidado(Data, IdUt, IdPrest, Descricao, C))).
+
+%permitir inserir conhecimento incerto sobre a descricao dos cuidados
 
 evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     Type == incerto,
     Incerto == descricao,
     evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
     insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+        cuidado(Data, IdUt, IdPrest, Desc, Custo))).
+
+%permitir remover conhecimento incerto sobre a descricao dos cuidados
+
+involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
+    Type == incerto,
+    Incerto == descricao,
+    involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
+    remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Desc, Custo))).
 
 
@@ -569,7 +623,16 @@ evolucao( [OPT1 | R], Type ) :-
 
 evolucao( [], impreciso ).
 
-%permitir idade imprecisa
+involucao( [OPT1 | R], Type ) :-
+    Type == impreciso,
+    solucoes(I, -OPT1::I, Li),
+    teste(Li),
+    remocao((excecao(OPT1))),
+    involucao(R, impreciso).
+
+involucao( [], impreciso ).
+
+%permitir inserir conhecimento impreciso sobre a idade dos utentes
 
 evolucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim) :-
     Type == impreciso,
@@ -580,7 +643,18 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim
                 Idade >= ValorInicio,
                 Idade =< ValorFim)).
 
-%permitir custo impreciso
+%permitir remover conhecimento impreciso sobre a idade dos utentes 
+
+involucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim) :-
+    Type == impreciso,
+    Impreciso == idade,
+    solucoes(I, -(excecao(utente(Id, Nome, Idade, Morada)))::I, Li),
+    teste(Li),
+    remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
+                Idade >= ValorInicio,
+                Idade =< ValorFim)).
+
+%permitir inserir conhecimento impreciso sobre o custo dos cuidados
 
 evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorInicio, ValorFim) :-
     Type == impreciso,
@@ -591,9 +665,20 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorI
                 Custo >= ValorInicio,
                 Custo =< ValorFim)).
 
+%permitir remover conhecimento impreciso sobre o custo dos cuidados
+
+involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorInicio, ValorFim) :-
+    Type == impreciso,
+    Impreciso == custo,
+    solucoes(I, -(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, Li),
+    teste(Li),
+    remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+                Custo >= ValorInicio,
+                Custo =< ValorFim)).
+
 %--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO INTERDITO ------------------------------------%
 
-%permitir morada interdita
+%permitir inserir conhecimento interdio sobre a morada dos utentes
 evolucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
     Type == interdito,
     Interdito == morada,
@@ -602,7 +687,14 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
         utente(Id, Nome, Idade, Morada))),
         insercao(nulo(Morada)).
 
-%permitir insituição interdita
+%permitir remover conhecimento interdio sobre a morada dos utentes
+involucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
+    Type == interdito,
+    Interdito == morada,
+    remocao(nulo(Morada)),
+    involucao(utente(Id, Nome, Idade, Morada), incerto, morada).
+
+%permitir inserir conhecimento interdito sobre a instituição dos serviços
 evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Interdito) :-
     Type == interdito,
     Interdito == instituicao,
@@ -611,7 +703,14 @@ evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Interdito) :-
         servico(IDServ,Descricao,Instituicao,Cidade))),
         insercao(nulo(Instituicao)).
 
-%permitir custo interdito
+%permitir remover conhecimento interdito sobre a instituição dos serviços
+involucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Interdito) :-
+    Type == interdito,
+    Interdito == instituicao,
+    remocao(nulo(Instituicao)),
+    involucao(servico(IDServ,Descricao,Instituicao,Cidade), incerto, instituicao).
+
+%permitir inserir conhecimento interdito sobre o custo dos cuidados
 evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     Type == interdito,
     Interdito == custo,
@@ -620,7 +719,14 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
         cuidado(Data, IdUt, IdPrest, Descricao, Custo))),
         insercao(nulo(Custo)).
 
-%permitir descricao interdita
+%permitir remover conhecimento interdito sobre o custo dos cuidados
+involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
+    Type == interdito,
+    Interdito == custo,
+    remocao(nulo(Custo)),
+    involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), incerto, custo).
+
+%permitir inserir conhecimento interdito sobre a descricao dos cuidados
 evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     Type == interdito,
     Interdito == descricao,
@@ -629,12 +735,14 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
         cuidado(Data, IdUt, IdPrest, Descricao, Custo))),
         insercao(nulo(Descricao)).
 
+%permitir remover conhecimento interdito sobre a descricao dos cuidados
+involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
+    Type == interdito,
+    Interdito == descricao,
+    remocao(nulo(Descricao)),
+    involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), incerto, descricao).
 
-
-Extensao do predicado servico: IDServ,Descricao,Instituicao,Cidade
-%Extensao do predicado prestador: #IdPrest, Nome, Especialidade, Instituição ↝ { 𝕍, 𝔽, 𝔻 }
-%Extensao do predicado cuidado: Data, #IdUt, #IdPrest, Descrição, Custo ↝ { 𝕍, 𝔽, 𝔻 }
-utente: #IdUt, Nome, Idade, Morada
+    
 %-------------------------- AUXILIARES ----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
 
