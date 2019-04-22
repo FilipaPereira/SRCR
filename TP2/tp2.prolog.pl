@@ -335,9 +335,9 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
                 nao(excecao(prestador(IDPrest, Nome, Esp, Inst))).
 
 % Pressuposto do mundo fechado para o predicado servico
--servico(IDServ, Desc, Inst, Cidade) :-
-                    nao(servico(IDServ, Desc, Inst, Cidade)),
-                    nao(excecao(servico(IDServ, Desc, Inst, Cidade))).
+-cuidado(Data,IDU,IDPrest,D,C) :-
+                    nao( cuidado(Data,IDU,IDPrest,D,C) ),
+                    nao( excecao(Data,IDU,IDPrest,D,C) ).
 
 
 % ------------------------------ CONHECIMENTO NEGATIVO -------------------------------
