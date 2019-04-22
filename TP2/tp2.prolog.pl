@@ -470,7 +470,7 @@ excecao( utente( Id,Nome,Idade,Morada ) ) :- utente( Id,Nome,Idade,desconhecido 
 
 % ----------------------------------------------------------------------------------------------------%
 
-%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO PERFEITO ------------------------------------%
+%--------------------------------------- EVOLUÇÃO/INVOLUÇÃO DE CONHECIMENTO PERFEITO ------------------------------------%
 
 % Extensao do predicao registar_utente: IdUtente, Nome, Idade, Morada -> {V, F}
 
@@ -501,7 +501,7 @@ registar_prestador(X,Y,W,Z) :- evolucao(prestador(X,Y,W,Z)).
 
 remover_prestador(X,Y,W,Z) :- involucao(prestador(X,Y,W,Z)).
 
-%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO INCERTO ------------------------------------%
+%--------------------------------------- EEVOLUÇÃO/INVOLUÇÃO DE CONHECIMENTO IMPERFEITO INCERTO ------------------------------------%
 
 %permitir inserir conhecimento incerto sobre a idade dos utentes
 
@@ -612,7 +612,7 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
         cuidado(Data, IdUt, IdPrest, Desc, Custo))).
 
 
-%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO IMPRECISO ------------------------------------%
+%--------------------------------------- EVOLUÇÃO/INVOLUÇÃO DE CONHECIMENTO IMPERFEITO IMPRECISO ------------------------------------%
 
 evolucao( [OPT1 | R], Type ) :-
     Type == impreciso,
@@ -676,7 +676,7 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, Valor
                 Custo >= ValorInicio,
                 Custo =< ValorFim)).
 
-%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO INTERDITO ------------------------------------%
+%--------------------------------------- EVOLUÇÃO/INVOLUÇÃO DE CONHECIMENTO IMPERFEITO INTERDITO ------------------------------------%
 
 %permitir inserir conhecimento interdio sobre a morada dos utentes
 evolucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
@@ -742,7 +742,7 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     remocao(nulo(Descricao)),
     involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), incerto, descricao).
 
-    
+
 %-------------------------- AUXILIARES ----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
 
