@@ -140,39 +140,41 @@ demoL( [Q, Op | T], R ) :- Op == ou,
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite a evolucao do conhecimento
 
-evolucao( T ) :- solucoes( I,+T::I,L ),
-                    insercao( T ), teste( L ).
+evolucao( T ) :- 
+    solucoes( I,+T::I,L ),
+    insercao( T ), 
+    teste( L ).
 
 involucao( T ) :- solucoes( I,-T::I,L ),
                 teste( L ), remocao( T ).
 
 
-% evolucao: F, Type -> {V,F}
-evolucao(F, Type) :-
+% evolucao: T, Type -> {V,F}
+evolucao(T, Type) :-
     Type == positivo,
-    solucoes(I, +F::I, Li),
-    teste(Li),
-    insercao(F).
+    solucoes(I, +T::I, L),
+    teste(L),
+    insercao(T).
 
-evolucao(F, Type) :-
+evolucao(T, Type) :-
     Type == negativo,
-    solucoes(I, +(-F)::I, Li),
-    teste(Li),
-    insercao(-F).
+    solucoes(I, +(-T)::I, L),
+    teste(L),
+    insercao(-T).
 
-% involucao: F, Type -> {V,F}
+% involucao: T, Type -> {V,F}
 
-involucao(F, Type) :-
+involucao(T, Type) :-
     Type == positivo,
-    solucoes(I, -F::I, Li),
-        teste(Li),
-        remocao(F).
+    solucoes(I, -T::I, L),
+        teste(L),
+        remocao(T).
 
-involucao(F, Type) :-
+involucao(T, Type) :-
     Type == negativo,
-    solucoes(I, -(-F)::I, Li),
-        teste(Li),
-        remocao(-F).
+    solucoes(I, -(-T)::I, L),
+        teste(L),
+        remocao(-T).
 
 remocao( T ) :- retract( T ).
 
@@ -501,7 +503,7 @@ registar_prestador(X,Y,W,Z) :- evolucao(prestador(X,Y,W,Z)).
 
 remover_prestador(X,Y,W,Z) :- involucao(prestador(X,Y,W,Z)).
 
-%--------------------------------------- EEVOLUÇÃO/INVOLUÇÃO DE CONHECIMENTO IMPERFEITO INCERTO ------------------------------------%
+%--------------------------------------- EVOLUÇÃO/INVOLUÇÃO DE CONHECIMENTO IMPERFEITO INCERTO ------------------------------------%
 
 %permitir inserir conhecimento incerto sobre a idade dos utentes
 
@@ -637,8 +639,8 @@ involucao( [], impreciso ).
 evolucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim) :-
     Type == impreciso,
     Impreciso == idade,
-    solucoes( I, +(excecao(utente(Id, Nome, Idade, Morada)))::I, Li ),
-    teste(Li),
+    solucoes( I, +(excecao(utente(Id, Nome, Idade, Morada)))::I, L),
+    teste(L),
     insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
                 Idade >= ValorInicio,
                 Idade =< ValorFim)).
@@ -648,8 +650,8 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim
 involucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim) :-
     Type == impreciso,
     Impreciso == idade,
-    solucoes(I, -(excecao(utente(Id, Nome, Idade, Morada)))::I, Li),
-    teste(Li),
+    solucoes(I, -(excecao(utente(Id, Nome, Idade, Morada)))::I, L),
+    teste(L),
     remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
                 Idade >= ValorInicio,
                 Idade =< ValorFim)).
@@ -659,8 +661,8 @@ involucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFi
 evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorInicio, ValorFim) :-
     Type == impreciso,
     Impreciso == custo,
-    solucoes(I, +(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, Li),
-    teste(Li),
+    solucoes(I, +(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, L),
+    teste(L),
     insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
                 Custo >= ValorInicio,
                 Custo =< ValorFim)).
@@ -670,8 +672,8 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorI
 involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorInicio, ValorFim) :-
     Type == impreciso,
     Impreciso == custo,
-    solucoes(I, -(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, Li),
-    teste(Li),
+    solucoes(I, -(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, L),
+    teste(L),
     remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
                 Custo >= ValorInicio,
                 Custo =< ValorFim)).
