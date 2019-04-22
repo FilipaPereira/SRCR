@@ -618,8 +618,8 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
 
 evolucao( [OPT1 | R], Type ) :-
     Type == impreciso,
-    solucoes( I, +(excecao(OPT1))::I, Li ),
-    teste(Li),
+    solucoes( I, +(excecao(OPT1))::I, L),
+    teste(L),
     insercao( (excecao( OPT1 )) ),
     evolucao( R,impreciso ).
 
@@ -627,8 +627,8 @@ evolucao( [], impreciso ).
 
 involucao( [OPT1 | R], Type ) :-
     Type == impreciso,
-    solucoes(I, -OPT1::I, Li),
-    teste(Li),
+    solucoes(I, -OPT1::I, L),
+    teste(L),
     remocao((excecao(OPT1))),
     involucao(R, impreciso).
 
