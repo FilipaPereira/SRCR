@@ -146,6 +146,34 @@ evolucao( T ) :- solucoes( I,+T::I,L ),
 involucao( T ) :- solucoes( I,-T::I,L ),
                 teste( L ), remocao( T ).
 
+
+% evolucao: F, Type -> {V,F}
+evolucao(F, Type) :-
+    Type == positivo,
+    solucoes(I, +F::I, Li),
+    teste(Li),
+    insercao(F).
+
+evolucao(F, Type) :-
+    Type == negativo,
+    solucoes(I, +(-F)::I, Li),
+    teste(Li),
+    insercao(-F).
+
+% involucao: F, Type -> {V,F}
+
+involucao(F, Type) :-
+    Type == positivo,
+    solucoes(I, -F::I, Li),
+        teste(Li),
+        remocao(F).
+
+involucao(F, Type) :-
+    Type == negativo,
+    solucoes(I, -(-F)::I, Li),
+        teste(Li),
+        remocao(-F).
+
 remocao( T ) :- retract( T ).
 
 insercao( T ) :- assert( T ).
@@ -378,7 +406,7 @@ excecao(utente(IDUt, Nome, Idade, Cidade)) :- utente(IDUt,Nome,Idade,cidade_desc
 excecao(utente(IDUt, Nome, Idade, Cidade)) :- utente(IDUt,Nome,idade_desconhecida,Cidade).
 excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo)) :- cuidado(Data, IDUt, IDPrest, Desc, custo_desconhecido).
 excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo)) :- cuidado(Data, utente_desconhecido, IDPrest, Desc, Custo).
-excecao(prestador(IdPrest, Nome, Esp, Inst)) :- medico(IdPrest, Nome, especialidades_desconhecidas, Inst).
+excecao(prestador(IdPrest, Nome, Esp, Inst)) :- prestador(IdPrest, Nome, especialidades_desconhecidas, Inst).
 excecao(cuidado(Data, IDUt, IDPrest, Desc, Custo)) :- cuidado(data_desconhecida, IDUt, IDPrest, Desc, Custo).
 excecao(servico(IDServ, Desc, Inst, Cidade)) :- servico(IDServ, Desc, instituicao_desconhecida, Cidade).
 
@@ -442,7 +470,7 @@ excecao( utente( Id,Nome,Idade,Morada ) ) :- utente( Id,Nome,Idade,desconhecido 
 
 % ----------------------------------------------------------------------------------------------------%
 
-%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO ------------------------------------%
+%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO PERFEITO ------------------------------------%
 
 % Extensao do predicao registar_utente: IdUtente, Nome, Idade, Morada -> {V, F}
 
@@ -473,8 +501,140 @@ registar_prestador(X,Y,W,Z) :- evolucao(prestador(X,Y,W,Z)).
 
 remover_prestador(X,Y,W,Z) :- involucao(prestador(X,Y,W,Z)).
 
+%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO INCERTO ------------------------------------%
 
-   
+%permitir idade desconhecida
+
+evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-  
+    Type == incerto,
+    Incerto == idade,
+    evolucao(utente(Id, Nome, Idade, Morada), positivo),
+    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
+        utente(Id, Nome, Idd, Morada))).
+
+%permitir morada desconhecida
+
+evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :- 
+    Type == incerto,
+    Incerto == morada,
+    evolucao(utente(Id, Nome, Idade, Morada), positivo),
+    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
+        utente(Id, Nome, Idade, Mrd))).
+
+%permitir instituição desconhecida no prestador
+
+evolucao(prestador(Id, Nome, Especialidade, Instituicao), Type, Incerto) :-
+    Type == incerto,
+    Incerto == instituicao,
+    evolucao(prestador(Id, Nome, Especialidade, Instituicao), positivo),
+    insercao((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
+        prestador(Id, Nome, Especialidade, Inst))).
+
+%permitir instituição desconhecida no servico
+
+evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Incerto) :-
+    Type == incerto,
+    Incerto == instituicao,
+    evolucao(servico(IDServ,Descricao,Instituicao,Cidade), positivo),
+    insercao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
+        servico(IDServ,Descricao,Inst,Cidade))).
+
+%permitir custo desconhecido
+
+evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
+    Type == incerto,
+    Incerto == custo,
+    evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
+    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+        cuidado(Data, IdUt, IdPrest, Descricao, C))).
+
+%permitir descricao desconhecida
+
+evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
+    Type == incerto,
+    Incerto == descricao,
+    evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
+    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+        cuidado(Data, IdUt, IdPrest, Desc, Custo))).
+
+
+%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO IMPRECISO ------------------------------------%
+
+evolucao( [OPT1 | R], Type ) :-
+    Type == impreciso,
+    solucoes( I, +(excecao(OPT1))::I, Li ),
+    teste(Li),
+    insercao( (excecao( OPT1 )) ),
+    evolucao( R,impreciso ).
+
+evolucao( [], impreciso ).
+
+%permitir idade imprecisa
+
+evolucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFim) :-
+    Type == impreciso,
+    Impreciso == idade,
+    solucoes( I, +(excecao(utente(Id, Nome, Idade, Morada)))::I, Li ),
+    teste(Li),
+    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
+                Idade >= ValorInicio,
+                Idade =< ValorFim)).
+
+%permitir custo impreciso
+
+evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorInicio, ValorFim) :-
+    Type == impreciso,
+    Impreciso == custo,
+    solucoes(I, +(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, Li),
+    teste(Li),
+    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+                Custo >= ValorInicio,
+                Custo =< ValorFim)).
+
+%--------------------------------------- EVOLUÇÃO DE CONHECIMENTO IMPERFEITO INTERDITO ------------------------------------%
+
+%permitir morada interdita
+evolucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
+    Type == interdito,
+    Interdito == morada,
+    evolucao(utente(Id, Nome, Idade, Morada), positivo),
+    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
+        utente(Id, Nome, Idade, Morada))),
+        insercao(nulo(Morada)).
+
+%permitir insituição interdita
+evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Interdito) :-
+    Type == interdito,
+    Interdito == instituicao,
+    evolucao(servico(IDServ,Descricao,Instituicao,Cidade), positivo),
+    insercao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
+        servico(IDServ,Descricao,Instituicao,Cidade))),
+        insercao(nulo(Instituicao)).
+
+%permitir custo interdito
+evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
+    Type == interdito,
+    Interdito == custo,
+    evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
+    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+        cuidado(Data, IdUt, IdPrest, Descricao, Custo))),
+        insercao(nulo(Custo)).
+
+%permitir descricao interdita
+evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
+    Type == interdito,
+    Interdito == descricao,
+    evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
+    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+        cuidado(Data, IdUt, IdPrest, Descricao, Custo))),
+        insercao(nulo(Descricao)).
+
+
+
+Extensao do predicado servico: IDServ,Descricao,Instituicao,Cidade
+%Extensao do predicado prestador: #IdPrest, Nome, Especialidade, Instituição ↝ { 𝕍, 𝔽, 𝔻 }
+%Extensao do predicado cuidado: Data, #IdUt, #IdPrest, Descrição, Custo ↝ { 𝕍, 𝔽, 𝔻 }
+utente: #IdUt, Nome, Idade, Morada
 %-------------------------- AUXILIARES ----------------------------------
 % Extensao do predicado pertence: Elemento,Lista -> {V,F}
 
