@@ -153,14 +153,14 @@ involucao( T ) :- solucoes( I,-T::I,L ),
 evolucao(T, Type) :-
     Type == positivo,
     solucoes(I, +T::I, L),
-    teste(L),
-    insercao(T).
+    insercao( T ), 
+    teste( L ).
 
 evolucao(T, Type) :-
     Type == negativo,
     solucoes(I, +(-T)::I, L),
-    teste(L),
-    insercao(-T).
+    insercao( -T ), 
+    teste( L ).
 
 % involucao: T, Type -> {V,F}
 
@@ -206,43 +206,9 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
 
 % Não é possível remover um utente que tenha cuidados prestados
 -utente( ID,NO,I,C ) :: (solucoes( ID,cuidado(_,ID,_,_,_),S ),
-                        comprimento( S,N ), N == 1).
+                        comprimento( S,N ), N == 0).
 
-% Não é possível declarar conhecimento negativo que contradiga conhecimento positivo já existente e vice-versa.
-+(-utente( ID,N,I,M )) :: (solucoes( (ID,N,I,M), utente(ID,N,I,M), S),
-                            comprimento(S,N),N==0).
 
-+utente( ID,N,I,M ) :: (solucoes( (ID,N,I,M), -utente(ID,N,I,M), S),
-                            comprimento(S,N),N==0).
-
-% Só é possível inserir conhecimento impreciso se não houver conhecimento incerto relativo à idade ou à morada
-+utente( ID,N,Idade,M ) :: ( solucoes( (excecao(utente( ID,N,I,M ))), excecao(utente( ID,N,I,M )), S ),
-                            comprimento( S,N ), N == 0 ).
-
-+utente( ID,N,I,Morada ) :: ( solucoes( (excecao(utente( ID,N,I,M ))), excecao(utente( ID,N,I,M )), S ),
-                            comprimento( S,N ), N == 0 ).
-
-% Invariantes que impedem a inserção de conhecimento acerca de conhecimento interdito sobre a idade e morada do utente.
-+utente( ID,N,I,M ) :: (solucoes( (ID,N,I,M), (utente(ID,N,nil,M), nulo( nil )), S),
-                        comprimento(S,N),N==0).
-
-+(-utente( ID,N,I,M )) :: (solucoes( (ID,N,I,M), (utente(ID,N,nil,M), nulo( nil )), S),
-                        comprimento(S,N),N==0).
-
-+utente( ID,N,I,M ) :: (solucoes( (ID,N,I,M), (utente(ID,N,I,nil), nulo( nil )), S),
-                        comprimento(S,N),N==0).
-
-+(-utente( ID,N,I,M )) :: (solucoes( (ID,N,I,M), (utente(ID,N,I,nil), nulo( nil )), S),
-                        comprimento(S,N),N==0).
-
-% Não é possível adicionar uma exceção relativa à idade nem à morada se se tratar de conhecimento perfeito.
-+excecao( utente(ID,N,Idade,M) ) :: ( nao( utente( ID,N,I,M ) ) ).
-
-+excecao( utente(ID,N,I,Morada) ) :: ( nao( utente( ID,N,I,M ) ) ).
-
-% Não é possível inserir uma exceção se esta já existir.
-+(excecao( utente(ID,N,I,M) )) :: ( solucoes( excecao( utente(ID,N,I,M) ), excecao( utente(ID,N,I,M) ), S),
-                                    comprimento( S,N ), N == 0).
 
 % ------------------------
 
@@ -256,13 +222,10 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
 
 % Não é possível remover um prestador que tenha cuidados prestados
 -prestador( ID,N,E,I ) :: (solucoes( ID,cuidado(_,_,ID,_,_),S ),
-                        comprimento( S,N ), N == 1).
+                        comprimento( S,N ), N == 0).
 
 % Não é possível declarar conhecimento negativo que contradiga conhecimento positivo já existente e vice-versa.
 +(-prestador( ID,N,E,I )) :: (solucoes( (ID,N,E,I), prestador(ID,N,E,I), S),
-                            comprimento(S,N),N==0).
-
-+prestador( ID,N,E,I ) :: (solucoes( (ID,N,E,I), -prestador(ID,N,E,I), S),
                             comprimento(S,N),N==0).
 
 % Invariantes que impedem a inserção de conhecimento acerca de conhecimento interdito sobre a especialidade e instituição do prestador.
@@ -298,7 +261,7 @@ comprimento( [H | T],R ) :- comprimento( T,S ), R is S+1.
                             servico(_,D,_,_),.
 
 % Não é possível remover um cuidado se ele não existir
--cuidado( Data,IDU,IDPrest,D,C ) :: (solucoes( (ID,IDU,D),(cuidados(Data,IDU,_,D,_)),S ),
+-cuidado( Data,IDU,IDPrest,D,C ) :: (solucoes( (ID,IDU,D),(cuidado(Data,IDU,_,D,_)),S ),
                                     comprimento( S,N ), N == 1).
 
 % Não é possível declarar conhecimento negativo que contradiga conhecimento positivo já existente e vice-versa.
@@ -511,8 +474,8 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
     Type == incerto,
     Incerto == idade,
     evolucao(utente(Id, Nome, Idade, Morada), positivo),
-    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
-        utente(Id, Nome, Idd, Morada))).
+    assert((excecao(utente(I, N, Idd, M)) :-
+        utente(I, N, Idade, M))).
 
 % permitir remover conhecimento incerto sobre a idade dos utentes
 
@@ -520,8 +483,8 @@ involucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
     Type == incerto,
     Incerto == idade,
     involucao(utente(Id, Nome, Idade, Morada), positivo),
-    remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
-        utente(Id, Nome, Idd, Morada))).
+    assert((excecao(utente(I, N, Idd, M)) :-
+        utente(I, N, Idade, M))).
 
 %permitir inserir conhecimento incerto sobre a morada dos utentes
 
@@ -529,25 +492,22 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
     Type == incerto,
     Incerto == morada,
     evolucao(utente(Id, Nome, Idade, Morada), positivo),
-    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
-        utente(Id, Nome, Idade, Mrd))).
+    assert((excecao(utente(I, N, Idd, M)) :-
+        utente(I, N, Idd, Morada))).
 
 %permitir remover conhecimento incerto sobre a morada dos utentes
 
 involucao(utente(Id, Nome, Idade, Morada), Type, Incerto) :-
     Type == incerto,
-    Incerto == morada,
+    Incerto == moradpa,
     involucao(utente(Id, Nome, Idade, Morada), positivo),
-    remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
-        utente(Id, Nome, Idade, Mrd))).
+    retract((excecao(utente(I, N, Idd, M)) :-
+        utente(I, N, Idd, Morada))).
 
 %permitir inserir conhecimento incerto sobre a instituição dos prestadores
 
-evolucao(prestador(Id, Nome, Especialidade, Instituicao), Type, Incerto) :-
-    Type == incerto,
-    Incerto == instituicao,
     evolucao(prestador(Id, Nome, Especialidade, Instituicao), positivo),
-    insercao((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
+    assert((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
         prestador(Id, Nome, Especialidade, Inst))).
 
 %permitir remover conhecimento incerto sobre a instituição dos prestadores
@@ -556,7 +516,7 @@ involucao(prestador(Id, Nome, Especialidade, Instituicao), Type, Incerto) :-
     Type == incerto,
     Incerto == instituicao,
     involucao(prestador(Id, Nome, Especialidade, Instituicao), positivo),
-    remocao((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
+    retract((excecao(prestador(Id, Nome, Especialidade, Instituicao)) :-
         prestador(Id, Nome, Especialidade, Inst))).
 
 %permitir inserir conhecimento incerto sobre a instituição dos serviços
@@ -565,7 +525,7 @@ evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Incerto) :-
     Type == incerto,
     Incerto == instituicao,
     evolucao(servico(IDServ,Descricao,Instituicao,Cidade), positivo),
-    insercao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
+    assert((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
         servico(IDServ,Descricao,Inst,Cidade))).
 
 %permitir remover conhecimento incerto sobre a instituição dos serviços
@@ -574,7 +534,7 @@ involucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Incerto) :-
     Type == incerto,
     Incerto == instituicao,
     involucao(servico(IDServ,Descricao,Instituicao,Cidade), positivo),
-    remocao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
+    retract((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
         servico(IDServ,Descricao,Inst,Cidade))).
 
 %permitir inserir conhecimento incerto sobre o custo dos cuidados
@@ -583,7 +543,7 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     Type == incerto,
     Incerto == custo,
     evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
-    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    assert((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Descricao, C))).
 
 %permitir remover conhecimento incerto sobre o custo dos cuidados
@@ -592,7 +552,7 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     Type == incerto,
     Incerto == custo,
     involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
-    remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    retract((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Descricao, C))).
 
 %permitir inserir conhecimento incerto sobre a descricao dos cuidados
@@ -601,7 +561,7 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     Type == incerto,
     Incerto == descricao,
     evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
-    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    assert((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Desc, Custo))).
 
 %permitir remover conhecimento incerto sobre a descricao dos cuidados
@@ -610,7 +570,7 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Incerto) :-
     Type == incerto,
     Incerto == descricao,
     involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
-    remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    retract((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Desc, Custo))).
 
 
@@ -652,7 +612,7 @@ involucao(utente(Id, Nome, Idade, Morada), Type, Impreciso, ValorInicio, ValorFi
     Impreciso == idade,
     solucoes(I, -(excecao(utente(Id, Nome, Idade, Morada)))::I, L),
     teste(L),
-    remocao((excecao(utente(Id, Nome, Idade, Morada)) :-
+    retract((excecao(utente(Id, Nome, Idade, Morada)) :-
                 Idade >= ValorInicio,
                 Idade =< ValorFim)).
 
@@ -663,7 +623,7 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, ValorI
     Impreciso == custo,
     solucoes(I, +(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, L),
     teste(L),
-    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    assert((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
                 Custo >= ValorInicio,
                 Custo =< ValorFim)).
 
@@ -674,7 +634,7 @@ involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Impreciso, Valor
     Impreciso == custo,
     solucoes(I, -(excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)))::I, L),
     teste(L),
-    remocao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    retract((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
                 Custo >= ValorInicio,
                 Custo =< ValorFim)).
 
@@ -685,15 +645,15 @@ evolucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
     Type == interdito,
     Interdito == morada,
     evolucao(utente(Id, Nome, Idade, Morada), positivo),
-    insercao((excecao(utente(Id, Nome, Idade, Morada)) :-
+    assert((excecao(utente(Id, Nome, Idade, Morada)) :-
         utente(Id, Nome, Idade, Morada))),
-        insercao(nulo(Morada)).
+        assert(nulo(Morada)).
 
 %permitir remover conhecimento interdio sobre a morada dos utentes
 involucao(utente(Id, Nome, Idade, Morada), Type, Interdito) :-
     Type == interdito,
     Interdito == morada,
-    remocao(nulo(Morada)),
+    retract(nulo(Morada)),
     involucao(utente(Id, Nome, Idade, Morada), incerto, morada).
 
 %permitir inserir conhecimento interdito sobre a instituição dos serviços
@@ -701,15 +661,15 @@ evolucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Interdito) :-
     Type == interdito,
     Interdito == instituicao,
     evolucao(servico(IDServ,Descricao,Instituicao,Cidade), positivo),
-    insercao((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
+    assert((excecao(servico(IDServ,Descricao,Instituicao,Cidade)) :-
         servico(IDServ,Descricao,Instituicao,Cidade))),
-        insercao(nulo(Instituicao)).
+        assert(nulo(Instituicao)).
 
 %permitir remover conhecimento interdito sobre a instituição dos serviços
 involucao(servico(IDServ,Descricao,Instituicao,Cidade), Type, Interdito) :-
     Type == interdito,
     Interdito == instituicao,
-    remocao(nulo(Instituicao)),
+    retract(nulo(Instituicao)),
     involucao(servico(IDServ,Descricao,Instituicao,Cidade), incerto, instituicao).
 
 %permitir inserir conhecimento interdito sobre o custo dos cuidados
@@ -717,15 +677,15 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     Type == interdito,
     Interdito == custo,
     evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
-    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    assert((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Descricao, Custo))),
-        insercao(nulo(Custo)).
+        assert(nulo(Custo)).
 
 %permitir remover conhecimento interdito sobre o custo dos cuidados
 involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     Type == interdito,
     Interdito == custo,
-    remocao(nulo(Custo)),
+    retract(nulo(Custo)),
     involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), incerto, custo).
 
 %permitir inserir conhecimento interdito sobre a descricao dos cuidados
@@ -733,15 +693,15 @@ evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     Type == interdito,
     Interdito == descricao,
     evolucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), positivo),
-    insercao((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
+    assert((excecao(cuidado(Data, IdUt, IdPrest, Descricao, Custo)) :-
         cuidado(Data, IdUt, IdPrest, Descricao, Custo))),
-        insercao(nulo(Descricao)).
+        assert(nulo(Descricao)).
 
 %permitir remover conhecimento interdito sobre a descricao dos cuidados
 involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), Type, Interdito) :-
     Type == interdito,
     Interdito == descricao,
-    remocao(nulo(Descricao)),
+    retract(nulo(Descricao)),
     involucao(cuidado(Data, IdUt, IdPrest, Descricao, Custo), incerto, descricao).
 
 
